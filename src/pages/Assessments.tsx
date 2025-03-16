@@ -7,30 +7,51 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { FileText, Plus, Search } from "lucide-react";
+import { FileText, Plus, Search, UserPlus, Users, Brain, LightBulb } from "lucide-react";
 import AssessmentGenerator from "@/components/assessments/AssessmentGenerator";
 import QuestionGenerator from "@/components/assessments/QuestionGenerator";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface AssessmentsProps {
-  userRole?: 'admin' | 'faculty' | 'student';
+  userRole?: 'admin' | 'faculty' | 'student' | 'placement-faculty' | 'class-faculty';
 }
 
-const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'faculty' }) => {
+const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'class-faculty' }) => {
   const [activeTab, setActiveTab] = useState<string>("active");
   const [showGenerator, setShowGenerator] = useState(false);
   const [showQuestionGenerator, setShowQuestionGenerator] = useState(false);
+  const [showAptitudeGenerator, setShowAptitudeGenerator] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<string>("all");
+  
+  // Mock group data
+  const groups = [
+    { id: "all", name: "All Groups" },
+    { id: "g1", name: "Computer Science - Year 1" },
+    { id: "g2", name: "Computer Science - Year 2" },
+    { id: "g3", name: "Electronics - Year 1" },
+    { id: "g4", name: "Placement Batch 2025" },
+  ];
   
   // Mock assessment data
   const assessments = [
-    { id: 1, title: "Midterm Physics Assessment", subject: "Physics", dueDate: "2025-04-10", status: "active" },
-    { id: 2, title: "Chemistry Practical Evaluation", subject: "Chemistry", dueDate: "2025-04-15", status: "active" },
-    { id: 3, title: "Mathematics Problem Set #3", subject: "Mathematics", dueDate: "2025-04-20", status: "active" },
-    { id: 4, title: "Literature Review Essay", subject: "English", dueDate: "2025-03-30", status: "completed" },
-    { id: 5, title: "Biology Final Exam", subject: "Biology", dueDate: "2025-05-15", status: "draft" },
+    { id: 1, title: "Midterm Physics Assessment", subject: "Physics", dueDate: "2025-04-10", status: "active", group: "g1" },
+    { id: 2, title: "Chemistry Practical Evaluation", subject: "Chemistry", dueDate: "2025-04-15", status: "active", group: "g2" },
+    { id: 3, title: "Mathematics Problem Set #3", subject: "Mathematics", dueDate: "2025-04-20", status: "active", group: "g3" },
+    { id: 4, title: "Literature Review Essay", subject: "English", dueDate: "2025-03-30", status: "completed", group: "g1" },
+    { id: 5, title: "Biology Final Exam", subject: "Biology", dueDate: "2025-05-15", status: "draft", group: "g2" },
+    { id: 6, title: "Aptitude Test - Logical Reasoning", subject: "Aptitude", dueDate: "2025-04-25", status: "active", group: "g4" },
   ];
 
-  const filteredAssessments = assessments.filter(assessment => assessment.status === activeTab);
+  const filteredAssessments = assessments.filter(assessment => {
+    // Filter by status
+    const statusMatch = assessment.status === activeTab;
+    
+    // Filter by group
+    const groupMatch = selectedGroup === "all" || assessment.group === selectedGroup;
+    
+    return statusMatch && groupMatch;
+  });
 
   const handleNewAssessment = () => {
     if (userRole === 'admin') {
@@ -39,6 +60,16 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'faculty' }) => {
     }
     
     setShowGenerator(true);
+  };
+
+  const handleNewAptitudeAssessment = () => {
+    if (userRole !== 'placement-faculty' && userRole !== 'class-faculty') {
+      toast.error("Only faculty can create aptitude assessments");
+      return;
+    }
+    
+    setShowAptitudeGenerator(true);
+    toast.info("Creating new aptitude assessment");
   };
   
   const closeGenerator = () => {
@@ -52,7 +83,9 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'faculty' }) => {
           <h1 className="text-3xl font-bold">
             {userRole === 'admin' 
               ? 'Assessment Progress Dashboard' 
-              : 'Faculty Assessment Dashboard'}
+              : userRole === 'placement-faculty'
+                ? 'Placement Faculty Dashboard'
+                : 'Faculty Assessment Dashboard'}
           </h1>
           {userRole !== 'admin' && (
             <div className="flex gap-2">
@@ -73,22 +106,100 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'faculty' }) => {
                 </DialogContent>
               </Dialog>
               
-              <Dialog open={showQuestionGenerator} onOpenChange={setShowQuestionGenerator}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="flex items-center">
-                    <FileText className="mr-2 h-4 w-4" /> Generate Questions
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[900px]">
-                  <DialogHeader>
-                    <DialogTitle>AI Question Generator</DialogTitle>
-                    <DialogDescription>
-                      Generate questions from a syllabus using AI technology.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <QuestionGenerator />
-                </DialogContent>
-              </Dialog>
+              {userRole === 'class-faculty' && (
+                <Dialog open={showQuestionGenerator} onOpenChange={setShowQuestionGenerator}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="flex items-center">
+                      <FileText className="mr-2 h-4 w-4" /> Generate Questions
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[900px]">
+                    <DialogHeader>
+                      <DialogTitle>AI Question Generator</DialogTitle>
+                      <DialogDescription>
+                        Generate questions from a syllabus using AI technology.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <QuestionGenerator />
+                  </DialogContent>
+                </Dialog>
+              )}
+              
+              {(userRole === 'placement-faculty' || userRole === 'class-faculty') && (
+                <Dialog open={showAptitudeGenerator} onOpenChange={setShowAptitudeGenerator}>
+                  <DialogTrigger asChild>
+                    <Button variant="secondary" className="flex items-center">
+                      <LightBulb className="mr-2 h-4 w-4" /> Create Aptitude Assessment
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[900px]">
+                    <DialogHeader>
+                      <DialogTitle>Aptitude Assessment Generator</DialogTitle>
+                      <DialogDescription>
+                        Create aptitude tests with AI assistance for placement preparation.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="p-6 space-y-6">
+                      <p className="text-center text-muted-foreground">
+                        This feature allows you to create aptitude assessments for placement preparation.
+                        You can generate MCQ questions on various aptitude topics like logical reasoning,
+                        quantitative aptitude, verbal ability, and more.
+                      </p>
+                      
+                      <div className="grid gap-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Assessment Title</label>
+                          <Input placeholder="e.g., Placement Aptitude Test - Batch 2025" />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Aptitude Topics</label>
+                          <Select defaultValue="logical">
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select topic" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="logical">Logical Reasoning</SelectItem>
+                              <SelectItem value="quantitative">Quantitative Aptitude</SelectItem>
+                              <SelectItem value="verbal">Verbal Ability</SelectItem>
+                              <SelectItem value="technical">Technical MCQs</SelectItem>
+                              <SelectItem value="mixed">Mixed Aptitude</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Number of Questions</label>
+                          <Input type="number" defaultValue="20" min="1" max="100" />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Target Group</label>
+                          <Select defaultValue="g4">
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a group" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {groups.filter(g => g.id !== "all").map((group) => (
+                                <SelectItem key={group.id} value={group.id}>
+                                  {group.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      
+                      <Button className="w-full" onClick={() => {
+                        toast.success("Aptitude assessment created successfully!");
+                        setShowAptitudeGenerator(false);
+                      }}>
+                        <Brain className="mr-2 h-4 w-4" /> Generate Aptitude Assessment
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
             </div>
           )}
         </div>
@@ -96,9 +207,35 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'faculty' }) => {
         <div className="grid gap-8">
           <Card>
             <CardHeader>
-              <CardTitle>
-                {userRole === 'admin' ? 'Assessment Analytics' : 'My Assessments'}
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>
+                  {userRole === 'admin' ? 'Assessment Analytics' : 'My Assessments'}
+                </CardTitle>
+                <div className="flex items-center gap-4">
+                  <Select 
+                    value={selectedGroup}
+                    onValueChange={setSelectedGroup}
+                  >
+                    <SelectTrigger className="w-[220px]">
+                      <SelectValue placeholder="Select a group" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {groups.map((group) => (
+                        <SelectItem key={group.id} value={group.id}>
+                          {group.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/groups">
+                      <Users className="mr-2 h-4 w-4" />
+                      Manage Groups
+                    </Link>
+                  </Button>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between mb-4">
@@ -125,6 +262,7 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'faculty' }) => {
                       <TableRow>
                         <TableHead>Title</TableHead>
                         <TableHead>Subject</TableHead>
+                        <TableHead>Group</TableHead>
                         <TableHead>Due Date</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
@@ -139,6 +277,9 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'faculty' }) => {
                             </div>
                           </TableCell>
                           <TableCell>{assessment.subject}</TableCell>
+                          <TableCell>
+                            {groups.find(g => g.id === assessment.group)?.name || 'Unknown Group'}
+                          </TableCell>
                           <TableCell>{assessment.dueDate}</TableCell>
                           <TableCell>
                             <Button 
@@ -167,6 +308,7 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'faculty' }) => {
                       <TableRow>
                         <TableHead>Title</TableHead>
                         <TableHead>Subject</TableHead>
+                        <TableHead>Group</TableHead>
                         <TableHead>Due Date</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
@@ -181,6 +323,9 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'faculty' }) => {
                             </div>
                           </TableCell>
                           <TableCell>{assessment.subject}</TableCell>
+                          <TableCell>
+                            {groups.find(g => g.id === assessment.group)?.name || 'Unknown Group'}
+                          </TableCell>
                           <TableCell>{assessment.dueDate}</TableCell>
                           <TableCell>
                             <Button 
@@ -209,6 +354,7 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'faculty' }) => {
                       <TableRow>
                         <TableHead>Title</TableHead>
                         <TableHead>Subject</TableHead>
+                        <TableHead>Group</TableHead>
                         <TableHead>Due Date</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
@@ -223,6 +369,9 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'faculty' }) => {
                             </div>
                           </TableCell>
                           <TableCell>{assessment.subject}</TableCell>
+                          <TableCell>
+                            {groups.find(g => g.id === assessment.group)?.name || 'Unknown Group'}
+                          </TableCell>
                           <TableCell>{assessment.dueDate}</TableCell>
                           <TableCell>
                             <Button 

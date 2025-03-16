@@ -1,46 +1,41 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
-import Users from "./pages/Users";
-import Assessments from "./pages/Assessments";
-import StudentAssessment from "./pages/StudentAssessment";
-import TakeAssessment from "./pages/TakeAssessment";
-import Settings from "./pages/Settings";
-import Analytics from "./pages/Analytics";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import './App.css';
 
-const queryClient = new QueryClient();
+// Pages
+import Index from './pages/Index';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import Assessments from './pages/Assessments';
+import Analytics from './pages/Analytics';
+import Users from './pages/Users';
+import Settings from './pages/Settings';
+import NotFound from './pages/NotFound';
+import TakeAssessment from './pages/TakeAssessment';
+import StudentAssessment from './pages/StudentAssessment';
+import Groups from './pages/Groups';
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/users" element={<Users />} />
-          <Route path="/assessments" element={<Assessments />} />
-          <Route path="/student-assessments" element={<StudentAssessment />} />
-          <Route path="/take-assessment/:id" element={<TakeAssessment />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/analytics" element={<Analytics />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App: React.FC = () => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/assessments" element={<Assessments />} />
+        <Route path="/groups" element={<Groups />} />
+        <Route path="/analytics" element={<Analytics />} />
+        <Route path="/users" element={<Users />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/take-assessment/:id" element={<TakeAssessment />} />
+        <Route path="/student/assessments" element={<StudentAssessment />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
+  );
+};
 
 export default App;
