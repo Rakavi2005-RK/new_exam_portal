@@ -1,5 +1,5 @@
-
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { FileText, Plus, Search, UserPlus, Users, Brain, LightBulb } from "lucide-react";
+import { FileText, Plus, Search, UserPlus, Users, Brain, Lightbulb } from "lucide-react";
 import AssessmentGenerator from "@/components/assessments/AssessmentGenerator";
 import QuestionGenerator from "@/components/assessments/QuestionGenerator";
 import { toast } from "sonner";
@@ -24,7 +24,6 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'class-faculty' })
   const [showAptitudeGenerator, setShowAptitudeGenerator] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<string>("all");
   
-  // Mock group data
   const groups = [
     { id: "all", name: "All Groups" },
     { id: "g1", name: "Computer Science - Year 1" },
@@ -33,7 +32,6 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'class-faculty' })
     { id: "g4", name: "Placement Batch 2025" },
   ];
   
-  // Mock assessment data
   const assessments = [
     { id: 1, title: "Midterm Physics Assessment", subject: "Physics", dueDate: "2025-04-10", status: "active", group: "g1" },
     { id: 2, title: "Chemistry Practical Evaluation", subject: "Chemistry", dueDate: "2025-04-15", status: "active", group: "g2" },
@@ -44,12 +42,8 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'class-faculty' })
   ];
 
   const filteredAssessments = assessments.filter(assessment => {
-    // Filter by status
     const statusMatch = assessment.status === activeTab;
-    
-    // Filter by group
     const groupMatch = selectedGroup === "all" || assessment.group === selectedGroup;
-    
     return statusMatch && groupMatch;
   });
 
