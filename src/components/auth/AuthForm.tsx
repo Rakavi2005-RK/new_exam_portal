@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
-  role: z.enum(["admin", "faculty", "student", "placement-faculty", "class-faculty"], { 
+  role: z.enum(["admin", "placement-faculty", "class-faculty", "student"], { 
     required_error: "Please select a role" 
   }).optional(),
 });
@@ -24,7 +24,7 @@ const registerSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
   confirmPassword: z.string().min(6, { message: "Confirm password must be at least 6 characters" }),
-  role: z.enum(["admin", "faculty", "student", "placement-faculty", "class-faculty"], { 
+  role: z.enum(["admin", "placement-faculty", "class-faculty", "student"], { 
     required_error: "Please select a role" 
   }),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -189,7 +189,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ defaultTab = 'login' }) => {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="faculty">Faculty</SelectItem>
                         <SelectItem value="placement-faculty">Placement Faculty</SelectItem>
                         <SelectItem value="class-faculty">Class Faculty</SelectItem>
                         <SelectItem value="student">Student</SelectItem>
@@ -273,7 +272,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ defaultTab = 'login' }) => {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="faculty">Faculty</SelectItem>
                         <SelectItem value="placement-faculty">Placement Faculty</SelectItem>
                         <SelectItem value="class-faculty">Class Faculty</SelectItem>
                         <SelectItem value="student">Student</SelectItem>
@@ -344,3 +342,4 @@ const AuthForm: React.FC<AuthFormProps> = ({ defaultTab = 'login' }) => {
 };
 
 export default AuthForm;
+

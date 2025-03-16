@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
@@ -8,14 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { FileText, Plus, Search, UserPlus, Users, Brain, Lightbulb } from "lucide-react";
+import { FileText, Plus, Search, Users, Brain, Lightbulb } from "lucide-react";
 import AssessmentGenerator from "@/components/assessments/AssessmentGenerator";
 import QuestionGenerator from "@/components/assessments/QuestionGenerator";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface AssessmentsProps {
-  userRole?: 'admin' | 'faculty' | 'student' | 'placement-faculty' | 'class-faculty';
+  userRole?: 'admin' | 'class-faculty' | 'student' | 'placement-faculty';
 }
 
 const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'class-faculty' }) => {
@@ -61,8 +60,8 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'class-faculty' })
   };
 
   const handleNewAptitudeAssessment = () => {
-    if (userRole !== 'placement-faculty' && userRole !== 'class-faculty') {
-      toast.error("Only faculty can create aptitude assessments");
+    if (userRole !== 'placement-faculty') {
+      toast.error("Only placement faculty can create aptitude assessments");
       return;
     }
     
@@ -74,14 +73,12 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'class-faculty' })
     setShowGenerator(false);
   };
   
-  // Returns true if user can access question generator
   const canAccessQuestionGenerator = () => {
-    return userRole === 'class-faculty' || userRole === 'faculty';
+    return userRole === 'class-faculty';
   };
   
-  // Returns true if user can access aptitude assessment creation
   const canAccessAptitudeGenerator = () => {
-    return userRole === 'placement-faculty' || userRole === 'faculty';
+    return userRole === 'placement-faculty';
   };
 
   return (
