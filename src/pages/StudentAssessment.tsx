@@ -129,14 +129,11 @@ const StudentAssessment: React.FC = () => {
                             <TableCell>{assessment.dueDate}</TableCell>
                             <TableCell>{renderStatusBadge(assessment.status)}</TableCell>
                             <TableCell>
-                              <Button 
-                                variant="default" 
-                                size="sm"
-                                component={Link}
-                                to={`/take-assessment/${assessment.id}`}
-                              >
-                                Start <ChevronRight className="ml-1 h-4 w-4" />
-                              </Button>
+                              <Link to={`/take-assessment/${assessment.id}`}>
+                                <Button variant="default" size="sm">
+                                  Start <ChevronRight className="ml-1 h-4 w-4" />
+                                </Button>
+                              </Link>
                             </TableCell>
                           </TableRow>
                         ))}
