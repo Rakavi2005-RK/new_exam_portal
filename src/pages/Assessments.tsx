@@ -6,10 +6,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { FileText, Plus, Search } from "lucide-react";
+import AssessmentGenerator from "@/components/assessments/AssessmentGenerator";
+import { toast } from "sonner";
 
-const Assessments: React.FC = () => {
+interface AssessmentsProps {
+  userRole?: 'admin' | 'faculty' | 'student';
+}
+
+const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'faculty' }) => {
   const [activeTab, setActiveTab] = useState<string>("active");
+  const [showGenerator, setShowGenerator] = useState(false);
   
   // Mock assessment data
   const assessments = [
@@ -22,20 +30,54 @@ const Assessments: React.FC = () => {
 
   const filteredAssessments = assessments.filter(assessment => assessment.status === activeTab);
 
+  const handleNewAssessment = () => {
+    if (userRole === 'admin') {
+      toast.error("Admins cannot create assessments");
+      return;
+    }
+    
+    setShowGenerator(true);
+  };
+  
+  const closeGenerator = () => {
+    setShowGenerator(false);
+  };
+
   return (
     <MainLayout>
       <div className="container mx-auto py-8">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold">Faculty Assessment Dashboard</h1>
-          <Button className="flex items-center">
-            <Plus className="mr-2 h-4 w-4" /> Create New Assessment
-          </Button>
+          <h1 className="text-3xl font-bold">
+            {userRole === 'admin' 
+              ? 'Assessment Progress Dashboard' 
+              : 'Faculty Assessment Dashboard'}
+          </h1>
+          {userRole !== 'admin' && (
+            <Dialog open={showGenerator} onOpenChange={setShowGenerator}>
+              <DialogTrigger asChild>
+                <Button className="flex items-center">
+                  <Plus className="mr-2 h-4 w-4" /> Create New Assessment
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[900px]">
+                <DialogHeader>
+                  <DialogTitle>Create New Assessment</DialogTitle>
+                  <DialogDescription>
+                    Use our AI-powered assessment generator to create a new assessment.
+                  </DialogDescription>
+                </DialogHeader>
+                <AssessmentGenerator />
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
 
         <div className="grid gap-8">
           <Card>
             <CardHeader>
-              <CardTitle>My Assessments</CardTitle>
+              <CardTitle>
+                {userRole === 'admin' ? 'Assessment Analytics' : 'My Assessments'}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between mb-4">
@@ -78,7 +120,19 @@ const Assessments: React.FC = () => {
                           <TableCell>{assessment.subject}</TableCell>
                           <TableCell>{assessment.dueDate}</TableCell>
                           <TableCell>
-                            <Button variant="outline" size="sm">View</Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                if (userRole === 'admin') {
+                                  toast.info("Viewing analytics for " + assessment.title);
+                                } else {
+                                  toast.info("Viewing details for " + assessment.title);
+                                }
+                              }}
+                            >
+                              {userRole === 'admin' ? 'Analytics' : 'View'}
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -108,7 +162,19 @@ const Assessments: React.FC = () => {
                           <TableCell>{assessment.subject}</TableCell>
                           <TableCell>{assessment.dueDate}</TableCell>
                           <TableCell>
-                            <Button variant="outline" size="sm">View</Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                if (userRole === 'admin') {
+                                  toast.info("Viewing results for " + assessment.title);
+                                } else {
+                                  toast.info("Viewing details for " + assessment.title);
+                                }
+                              }}
+                            >
+                              {userRole === 'admin' ? 'Results' : 'View'}
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -138,7 +204,13 @@ const Assessments: React.FC = () => {
                           <TableCell>{assessment.subject}</TableCell>
                           <TableCell>{assessment.dueDate}</TableCell>
                           <TableCell>
-                            <Button variant="outline" size="sm">Edit</Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => toast.info("Editing " + assessment.title)}
+                            >
+                              Edit
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}
