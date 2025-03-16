@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { FileText, Upload, Sparkles, CheckCircle, Plus, X } from 'lucide-react';
+import { FileText, Upload, Sparkles, CheckCircle, Plus, X, Calculator } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -22,34 +22,33 @@ import {
 
 const schema = z.object({
   subject: z.string().min(1, "Subject is required"),
-  topic: z.string().min(1, "Topic is required"),
-  difficultyLevel: z.string().min(1, "Difficulty level is required"),
-  questionCount: z.coerce.number().int().min(1).max(100).default(10),
-  instructions: z.string().optional(),
-  category: z.string().optional(),
-  distribution: z.string().default("random"),
-  syllabus: z.any().optional(),
+  inputMethod: z.enum(["upload", "manual"]),
+  syllabusText: z.string().optional(),
 });
+
+// Define the mark category type
+interface MarkCategory {
+  id: string;
+  marks: number;
+  questionCount: number;
+  total: number;
+}
 
 const QuestionGenerator: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [generationProgress, setGenerationProgress] = useState(0);
   const [generatedQuestions, setGeneratedQuestions] = useState<string | null>(null);
-  const [markCategories, setMarkCategories] = useState<string[]>(["1 mark", "5 marks", "10 marks"]);
-  const [newCategoryValue, setNewCategoryValue] = useState("");
-  const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
+  const [markCategories, setMarkCategories] = useState<MarkCategory[]>([
+    { id: '1', marks: 1, questionCount: 5, total: 5 },
+    { id: '2', marks: 5, questionCount: 3, total: 15 },
+  ]);
   
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
       subject: "",
-      topic: "",
-      difficultyLevel: "medium",
-      questionCount: 10,
-      instructions: "",
-      category: "",
-      distribution: "random",
+      inputMethod: "upload",
     }
   });
   
@@ -61,16 +60,63 @@ const QuestionGenerator: React.FC = () => {
     }
   };
   
-  const addNewCategory = () => {
-    if (newCategoryValue.trim()) {
-      setMarkCategories([...markCategories, newCategoryValue.trim()]);
-      setNewCategoryValue("");
-      setShowNewCategoryInput(false);
-      toast.success(`Added new category: ${newCategoryValue}`);
+  const handleMarkCategoryChange = (id: string, field: 'marks' | 'questionCount', value: number) => {
+    setMarkCategories(prev => 
+      prev.map(category => {
+        if (category.id === id) {
+          const updatedCategory = { 
+            ...category, 
+            [field]: value 
+          };
+          return { 
+            ...updatedCategory, 
+            total: updatedCategory.marks * updatedCategory.questionCount 
+          };
+        }
+        return category;
+      })
+    );
+  };
+  
+  const addMarkCategory = () => {
+    const newId = String(markCategories.length + 1);
+    setMarkCategories([
+      ...markCategories, 
+      { id: newId, marks: 0, questionCount: 0, total: 0 }
+    ]);
+  };
+  
+  const removeMarkCategory = (id: string) => {
+    if (markCategories.length > 1) {
+      setMarkCategories(markCategories.filter(category => category.id !== id));
+    } else {
+      toast.error("You must have at least one mark category");
     }
   };
 
   const onSubmit = async (data: z.infer<typeof schema>) => {
+    // Check if mark categories are valid
+    const hasInvalidCategory = markCategories.some(
+      category => category.marks <= 0 || category.questionCount <= 0
+    );
+    
+    if (hasInvalidCategory) {
+      toast.error("All mark categories must have values greater than zero");
+      return;
+    }
+    
+    // Check if syllabus is provided when manual input is selected
+    if (data.inputMethod === "manual" && (!data.syllabusText || data.syllabusText.trim() === "")) {
+      toast.error("Please provide syllabus text for manual input");
+      return;
+    }
+    
+    // Check if file is uploaded when upload is selected
+    if (data.inputMethod === "upload" && !uploadedFile) {
+      toast.error("Please upload a syllabus file");
+      return;
+    }
+    
     setIsGenerating(true);
     setGenerationProgress(0);
     setGeneratedQuestions(null);
@@ -106,42 +152,20 @@ const QuestionGenerator: React.FC = () => {
       await new Promise(resolve => setTimeout(() => {
         updateProgress(5);
         
-        // Mock generated questions with the new category and distribution info
+        // Generate questions based on mark categories
+        const questions = markCategories.flatMap(category => {
+          const categoryQuestions = [];
+          for (let i = 1; i <= category.questionCount; i++) {
+            categoryQuestions.push(`${categoryQuestions.length + 1}. Explain the concept of [topic] and its application in real-world scenarios. [${category.marks} marks]`);
+          }
+          return categoryQuestions;
+        });
+        
         const mockQuestions = `
-## Physics Assessment - ${data.topic}
-### Difficulty: ${data.difficultyLevel}
-### Category: ${data.category || "General"}
-### Distribution: ${data.distribution === "equally" ? "Questions equally distributed across units" : "Randomly generated questions"}
+## ${data.subject} Assessment
+### Input Method: ${data.inputMethod === "upload" ? `File Upload: ${uploadedFile?.name}` : "Manual Input"}
 
-1. What is the relationship between force, mass, and acceleration according to Newton's Second Law? [${data.category || "5 marks"}]
-   a) F = ma
-   b) F = m/a
-   c) F = a/m
-   d) F = m²a
-
-2. Which of the following is a vector quantity? [${data.category || "5 marks"}]
-   a) Mass
-   b) Temperature
-   c) Velocity
-   d) Energy
-
-3. What is the SI unit of electric current? [${data.category || "5 marks"}]
-   a) Volt
-   b) Watt
-   c) Ohm
-   d) Ampere
-
-4. Which scientist formulated the theory of general relativity? [${data.category || "5 marks"}]
-   a) Isaac Newton
-   b) Albert Einstein
-   c) Niels Bohr
-   d) Max Planck
-
-5. What is the principle of conservation of energy? [${data.category || "5 marks"}]
-   a) Energy can be created but not destroyed
-   b) Energy can be destroyed but not created
-   c) Energy cannot be created or destroyed, only transformed
-   d) Energy is constantly being created and destroyed
+${questions.join('\n\n')}
 `;
         
         setGeneratedQuestions(mockQuestions);
@@ -156,6 +180,8 @@ const QuestionGenerator: React.FC = () => {
       setIsGenerating(false);
     }
   };
+  
+  const inputMethod = form.watch("inputMethod");
   
   return (
     <Card className="shadow-md">
@@ -203,237 +229,185 @@ const QuestionGenerator: React.FC = () => {
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="subject"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Subject</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. Physics" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="topic"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Topic</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. Mechanics, Thermodynamics" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="difficultyLevel"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Difficulty Level</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select difficulty" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="easy">Easy</SelectItem>
-                          <SelectItem value="medium">Medium</SelectItem>
-                          <SelectItem value="hard">Hard</SelectItem>
-                          <SelectItem value="expert">Expert</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="questionCount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Number of Questions</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          min={1} 
-                          max={100} 
-                          placeholder="10" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Choose between 1-100 questions
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mark Category</FormLabel>
-                      <div className="relative">
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select mark category" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {markCategories.map((category) => (
-                              <SelectItem key={category} value={category}>
-                                {category}
-                              </SelectItem>
-                            ))}
-                            <SelectItem value="_new" className="text-primary font-medium">
-                              <div className="flex items-center gap-1.5" onClick={(e) => {
-                                e.preventDefault();
-                                setShowNewCategoryInput(true);
-                              }}>
-                                <Plus className="h-3.5 w-3.5" />
-                                <span>New item</span>
-                              </div>
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      {showNewCategoryInput && (
-                        <div className="mt-2 flex items-center gap-2">
-                          <Input
-                            placeholder="e.g. 3 marks"
-                            value={newCategoryValue}
-                            onChange={(e) => setNewCategoryValue(e.target.value)}
-                            className="flex-1"
-                          />
-                          <Button 
-                            type="button" 
-                            variant="outline" 
-                            size="icon"
-                            onClick={addNewCategory}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            type="button" 
-                            variant="outline" 
-                            size="icon"
-                            onClick={() => setShowNewCategoryInput(false)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="distribution"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Question Distribution</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select distribution method" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="random">Random - any units</SelectItem>
-                          <SelectItem value="equally">Equally - across all units</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        How questions should be distributed across syllabus units
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
               <FormField
                 control={form.control}
-                name="instructions"
+                name="subject"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Additional Instructions (Optional)</FormLabel>
+                    <FormLabel>Subject</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Add specific instructions for question generation" 
-                        className="min-h-24" 
-                        {...field} 
-                      />
+                      <Input placeholder="e.g. Physics" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               
-              <div className="space-y-2">
-                <FormLabel>Upload Syllabus (Optional)</FormLabel>
-                <div className="border border-dashed rounded-md p-6 text-center space-y-4">
-                  <div className="flex flex-col items-center justify-center">
-                    {uploadedFile ? (
-                      <div className="flex items-center gap-2 text-green-600">
-                        <CheckCircle className="h-5 w-5" />
-                        <span>{uploadedFile.name}</span>
-                      </div>
-                    ) : (
-                      <>
-                        <Upload className="h-10 w-10 text-muted-foreground mb-2" />
-                        <p className="text-sm text-muted-foreground">
-                          Drag & drop a file here, or click to browse
-                        </p>
-                      </>
-                    )}
+              <FormField
+                control={form.control}
+                name="inputMethod"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Input Method</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select input method" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="upload">Upload File</SelectItem>
+                        <SelectItem value="manual">Manual Input</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              {inputMethod === "upload" ? (
+                <div className="space-y-2">
+                  <FormLabel>Upload Syllabus</FormLabel>
+                  <div className="border border-dashed rounded-md p-6 text-center space-y-4">
+                    <div className="flex flex-col items-center justify-center">
+                      {uploadedFile ? (
+                        <div className="flex items-center gap-2 text-green-600">
+                          <CheckCircle className="h-5 w-5" />
+                          <span>{uploadedFile.name}</span>
+                        </div>
+                      ) : (
+                        <>
+                          <Upload className="h-10 w-10 text-muted-foreground mb-2" />
+                          <p className="text-sm text-muted-foreground">
+                            Drag & drop a file here, or click to browse
+                          </p>
+                        </>
+                      )}
+                    </div>
+                    <input
+                      type="file"
+                      id="syllabus-upload"
+                      accept=".pdf,.doc,.docx,.txt"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                    <Button 
+                      type="button" 
+                      variant="outline"
+                      onClick={() => document.getElementById('syllabus-upload')?.click()}
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+                      Browse Files
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Supported formats: PDF, DOC, DOCX, TXT
+                    </p>
                   </div>
-                  <input
-                    type="file"
-                    id="syllabus-upload"
-                    accept=".pdf,.doc,.docx,.txt"
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-                  <Button 
-                    type="button" 
-                    variant="outline"
-                    onClick={() => document.getElementById('syllabus-upload')?.click()}
-                  >
-                    <FileText className="mr-2 h-4 w-4" />
-                    Browse Files
-                  </Button>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Supported formats: PDF, DOC, DOCX, TXT
-                  </p>
+                </div>
+              ) : (
+                <FormField
+                  control={form.control}
+                  name="syllabusText"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Syllabus</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Paste or type your syllabus content here" 
+                          className="min-h-32" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <FormLabel>Mark Categories</FormLabel>
+                </div>
+                
+                <div className="border rounded-md overflow-hidden">
+                  <div className="grid grid-cols-4 bg-muted p-3 border-b text-sm font-medium">
+                    <div>Marks</div>
+                    <div>Number of Questions</div>
+                    <div>Total</div>
+                    <div className="text-right">Action</div>
+                  </div>
+                  
+                  <div className="divide-y">
+                    {markCategories.map((category) => (
+                      <div key={category.id} className="grid grid-cols-4 p-3 items-center">
+                        <div>
+                          <Input 
+                            type="number" 
+                            min={1}
+                            value={category.marks || ''}
+                            onChange={(e) => handleMarkCategoryChange(
+                              category.id, 
+                              'marks', 
+                              parseInt(e.target.value) || 0
+                            )}
+                            className="w-20"
+                          />
+                        </div>
+                        <div>
+                          <Input 
+                            type="number" 
+                            min={1}
+                            value={category.questionCount || ''}
+                            onChange={(e) => handleMarkCategoryChange(
+                              category.id, 
+                              'questionCount', 
+                              parseInt(e.target.value) || 0
+                            )}
+                            className="w-20"
+                          />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{category.total}</span>
+                          <Calculator className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <div className="text-right">
+                          <Button 
+                            type="button"
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => removeMarkCategory(category.id)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="p-3 bg-muted/50 border-t">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm"
+                      className="w-full flex items-center justify-center"
+                      onClick={addMarkCategory}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Row
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between pt-2">
+                  <div className="text-sm text-muted-foreground">
+                    Total marks: {markCategories.reduce((sum, category) => sum + category.total, 0)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Total questions: {markCategories.reduce((sum, category) => sum + category.questionCount, 0)}
+                  </div>
                 </div>
               </div>
               
