@@ -12,6 +12,7 @@ interface CustomCardProps {
   gradient?: boolean;
   glassEffect?: boolean;
   hoverEffect?: boolean;
+  style?: React.CSSProperties;
 }
 
 const CustomCard: React.FC<CustomCardProps> = ({
@@ -23,6 +24,7 @@ const CustomCard: React.FC<CustomCardProps> = ({
   gradient = false,
   glassEffect = false,
   hoverEffect = false,
+  style,
 }) => {
   return (
     <Card
@@ -33,6 +35,7 @@ const CustomCard: React.FC<CustomCardProps> = ({
         hoverEffect && "transition-all duration-300 hover:shadow-lg hover:-translate-y-1",
         className
       )}
+      style={style}
     >
       {(title || description) && (
         <CardHeader>

@@ -14,6 +14,7 @@ interface StatCardProps {
     isPositive: boolean;
   };
   className?: string;
+  style?: React.CSSProperties;
 }
 
 const StatCard: React.FC<StatCardProps> = ({
@@ -23,11 +24,13 @@ const StatCard: React.FC<StatCardProps> = ({
   icon,
   trend,
   className,
+  style,
 }) => {
   return (
     <CustomCard
       className={cn("flex flex-col h-full", className)}
       glassEffect
+      style={style}
     >
       <div className="flex justify-between items-start">
         <div className="space-y-1">
