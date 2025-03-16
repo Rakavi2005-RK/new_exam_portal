@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -15,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
-  role: z.enum(["admin", "faculty", "student"], { 
+  role: z.enum(["admin", "faculty", "student", "placement-faculty", "class-faculty"], { 
     required_error: "Please select a role" 
   }).optional(),
 });
@@ -25,7 +24,7 @@ const registerSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
   confirmPassword: z.string().min(6, { message: "Confirm password must be at least 6 characters" }),
-  role: z.enum(["admin", "faculty", "student"], { 
+  role: z.enum(["admin", "faculty", "student", "placement-faculty", "class-faculty"], { 
     required_error: "Please select a role" 
   }),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -76,10 +75,10 @@ const AuthForm: React.FC<AuthFormProps> = ({ defaultTab = 'login' }) => {
       toast.success('Login successful!');
       
       // Redirect based on role
-      if (values.role === "faculty") {
+      if (values.role === "faculty" || values.role === "placement-faculty" || values.role === "class-faculty") {
         navigate('/assessments');
       } else if (values.role === "student") {
-        navigate('/student-assessments'); // Changed from course-catalog to student-assessments
+        navigate('/student/assessments');
       } else {
         // Default to dashboard for admin or if role is not specified
         navigate('/dashboard');
@@ -102,10 +101,10 @@ const AuthForm: React.FC<AuthFormProps> = ({ defaultTab = 'login' }) => {
       toast.success('Registration successful!');
       
       // Redirect based on role
-      if (values.role === "faculty") {
+      if (values.role === "faculty" || values.role === "placement-faculty" || values.role === "class-faculty") {
         navigate('/assessments');
       } else if (values.role === "student") {
-        navigate('/student-assessments'); // Changed from course-catalog to student-assessments
+        navigate('/student/assessments');
       } else {
         // Default to dashboard for admin
         navigate('/dashboard');
@@ -191,6 +190,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ defaultTab = 'login' }) => {
                       <SelectContent>
                         <SelectItem value="admin">Admin</SelectItem>
                         <SelectItem value="faculty">Faculty</SelectItem>
+                        <SelectItem value="placement-faculty">Placement Faculty</SelectItem>
+                        <SelectItem value="class-faculty">Class Faculty</SelectItem>
                         <SelectItem value="student">Student</SelectItem>
                       </SelectContent>
                     </Select>
@@ -273,6 +274,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ defaultTab = 'login' }) => {
                       <SelectContent>
                         <SelectItem value="admin">Admin</SelectItem>
                         <SelectItem value="faculty">Faculty</SelectItem>
+                        <SelectItem value="placement-faculty">Placement Faculty</SelectItem>
+                        <SelectItem value="class-faculty">Class Faculty</SelectItem>
                         <SelectItem value="student">Student</SelectItem>
                       </SelectContent>
                     </Select>

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
@@ -23,6 +24,9 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'class-faculty' })
   const [showQuestionGenerator, setShowQuestionGenerator] = useState(false);
   const [showAptitudeGenerator, setShowAptitudeGenerator] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<string>("all");
+  const [generatorSelectedGroup, setGeneratorSelectedGroup] = useState<string>("g1");
+  const [questionGeneratorSelectedGroup, setQuestionGeneratorSelectedGroup] = useState<string>("g1");
+  const [aptitudeGeneratorSelectedGroup, setAptitudeGeneratorSelectedGroup] = useState<string>("g4");
   
   const groups = [
     { id: "all", name: "All Groups" },
@@ -69,6 +73,16 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'class-faculty' })
   const closeGenerator = () => {
     setShowGenerator(false);
   };
+  
+  // Returns true if user can access question generator
+  const canAccessQuestionGenerator = () => {
+    return userRole === 'class-faculty' || userRole === 'faculty';
+  };
+  
+  // Returns true if user can access aptitude assessment creation
+  const canAccessAptitudeGenerator = () => {
+    return userRole === 'placement-faculty' || userRole === 'faculty';
+  };
 
   return (
     <MainLayout>
@@ -96,11 +110,29 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'class-faculty' })
                       Use our AI-powered assessment generator to create a new assessment.
                     </DialogDescription>
                   </DialogHeader>
+                  <div className="mb-4">
+                    <label className="text-sm font-medium">Target Group</label>
+                    <Select 
+                      value={generatorSelectedGroup}
+                      onValueChange={setGeneratorSelectedGroup}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a group" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {groups.filter(g => g.id !== "all").map((group) => (
+                          <SelectItem key={group.id} value={group.id}>
+                            {group.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <AssessmentGenerator />
                 </DialogContent>
               </Dialog>
               
-              {userRole === 'class-faculty' && (
+              {canAccessQuestionGenerator() && (
                 <Dialog open={showQuestionGenerator} onOpenChange={setShowQuestionGenerator}>
                   <DialogTrigger asChild>
                     <Button variant="outline" className="flex items-center">
@@ -114,12 +146,30 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'class-faculty' })
                         Generate questions from a syllabus using AI technology.
                       </DialogDescription>
                     </DialogHeader>
+                    <div className="mb-4">
+                      <label className="text-sm font-medium">Target Group</label>
+                      <Select 
+                        value={questionGeneratorSelectedGroup}
+                        onValueChange={setQuestionGeneratorSelectedGroup}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a group" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {groups.filter(g => g.id !== "all").map((group) => (
+                            <SelectItem key={group.id} value={group.id}>
+                              {group.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <QuestionGenerator />
                   </DialogContent>
                 </Dialog>
               )}
               
-              {(userRole === 'placement-faculty' || userRole === 'class-faculty') && (
+              {canAccessAptitudeGenerator() && (
                 <Dialog open={showAptitudeGenerator} onOpenChange={setShowAptitudeGenerator}>
                   <DialogTrigger asChild>
                     <Button variant="secondary" className="flex items-center">
@@ -134,7 +184,7 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'class-faculty' })
                       </DialogDescription>
                     </DialogHeader>
                     <div className="p-6 space-y-6">
-                      <p className="text-center text-muted-foreground">
+                      <p className="text-left text-muted-foreground">
                         This feature allows you to create aptitude assessments for placement preparation.
                         You can generate MCQ questions on various aptitude topics like logical reasoning,
                         quantitative aptitude, verbal ability, and more.
@@ -169,7 +219,10 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'class-faculty' })
                         
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Target Group</label>
-                          <Select defaultValue="g4">
+                          <Select 
+                            value={aptitudeGeneratorSelectedGroup}
+                            onValueChange={setAptitudeGeneratorSelectedGroup}
+                          >
                             <SelectTrigger>
                               <SelectValue placeholder="Select a group" />
                             </SelectTrigger>
