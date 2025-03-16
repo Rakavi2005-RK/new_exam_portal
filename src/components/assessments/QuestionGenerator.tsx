@@ -10,8 +10,15 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { FileText, Upload, Sparkles, CheckCircle } from 'lucide-react';
+import { FileText, Upload, Sparkles, CheckCircle, Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 
 const schema = z.object({
   subject: z.string().min(1, "Subject is required"),
@@ -19,6 +26,8 @@ const schema = z.object({
   difficultyLevel: z.string().min(1, "Difficulty level is required"),
   questionCount: z.coerce.number().int().min(1).max(100).default(10),
   instructions: z.string().optional(),
+  category: z.string().optional(),
+  distribution: z.string().default("random"),
   syllabus: z.any().optional(),
 });
 
@@ -27,6 +36,9 @@ const QuestionGenerator: React.FC = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [generationProgress, setGenerationProgress] = useState(0);
   const [generatedQuestions, setGeneratedQuestions] = useState<string | null>(null);
+  const [markCategories, setMarkCategories] = useState<string[]>(["1 mark", "5 marks", "10 marks"]);
+  const [newCategoryValue, setNewCategoryValue] = useState("");
+  const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
   
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -36,6 +48,8 @@ const QuestionGenerator: React.FC = () => {
       difficultyLevel: "medium",
       questionCount: 10,
       instructions: "",
+      category: "",
+      distribution: "random",
     }
   });
   
@@ -47,6 +61,15 @@ const QuestionGenerator: React.FC = () => {
     }
   };
   
+  const addNewCategory = () => {
+    if (newCategoryValue.trim()) {
+      setMarkCategories([...markCategories, newCategoryValue.trim()]);
+      setNewCategoryValue("");
+      setShowNewCategoryInput(false);
+      toast.success(`Added new category: ${newCategoryValue}`);
+    }
+  };
+
   const onSubmit = async (data: z.infer<typeof schema>) => {
     setIsGenerating(true);
     setGenerationProgress(0);
@@ -83,36 +106,38 @@ const QuestionGenerator: React.FC = () => {
       await new Promise(resolve => setTimeout(() => {
         updateProgress(5);
         
-        // Mock generated questions
+        // Mock generated questions with the new category and distribution info
         const mockQuestions = `
 ## Physics Assessment - ${data.topic}
 ### Difficulty: ${data.difficultyLevel}
+### Category: ${data.category || "General"}
+### Distribution: ${data.distribution === "equally" ? "Questions equally distributed across units" : "Randomly generated questions"}
 
-1. What is the relationship between force, mass, and acceleration according to Newton's Second Law?
+1. What is the relationship between force, mass, and acceleration according to Newton's Second Law? [${data.category || "5 marks"}]
    a) F = ma
    b) F = m/a
    c) F = a/m
    d) F = m²a
 
-2. Which of the following is a vector quantity?
+2. Which of the following is a vector quantity? [${data.category || "5 marks"}]
    a) Mass
    b) Temperature
    c) Velocity
    d) Energy
 
-3. What is the SI unit of electric current?
+3. What is the SI unit of electric current? [${data.category || "5 marks"}]
    a) Volt
    b) Watt
    c) Ohm
    d) Ampere
 
-4. Which scientist formulated the theory of general relativity?
+4. Which scientist formulated the theory of general relativity? [${data.category || "5 marks"}]
    a) Isaac Newton
    b) Albert Einstein
    c) Niels Bohr
    d) Max Planck
 
-5. What is the principle of conservation of energy?
+5. What is the principle of conservation of energy? [${data.category || "5 marks"}]
    a) Energy can be created but not destroyed
    b) Energy can be destroyed but not created
    c) Energy cannot be created or destroyed, only transformed
@@ -253,6 +278,101 @@ const QuestionGenerator: React.FC = () => {
                       </FormControl>
                       <FormDescription>
                         Choose between 1-100 questions
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mark Category</FormLabel>
+                      <div className="relative">
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select mark category" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {markCategories.map((category) => (
+                              <SelectItem key={category} value={category}>
+                                {category}
+                              </SelectItem>
+                            ))}
+                            <SelectItem value="_new" className="text-primary font-medium">
+                              <div className="flex items-center gap-1.5" onClick={(e) => {
+                                e.preventDefault();
+                                setShowNewCategoryInput(true);
+                              }}>
+                                <Plus className="h-3.5 w-3.5" />
+                                <span>New item</span>
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {showNewCategoryInput && (
+                        <div className="mt-2 flex items-center gap-2">
+                          <Input
+                            placeholder="e.g. 3 marks"
+                            value={newCategoryValue}
+                            onChange={(e) => setNewCategoryValue(e.target.value)}
+                            className="flex-1"
+                          />
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="icon"
+                            onClick={addNewCategory}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="icon"
+                            onClick={() => setShowNewCategoryInput(false)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="distribution"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Question Distribution</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select distribution method" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="random">Random - any units</SelectItem>
+                          <SelectItem value="equally">Equally - across all units</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        How questions should be distributed across syllabus units
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
