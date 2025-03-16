@@ -1,17 +1,19 @@
+
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Clock, CheckCircle, AlertCircle, ChevronRight } from "lucide-react";
+import { FileText, Clock, CheckCircle, AlertCircle, ChevronRight, PlusCircle, Sparkles } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 
 const StudentAssessment: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("pending");
+  const navigate = useNavigate();
   
   // Mock assessment data for a student
   const assessments = [
@@ -65,6 +67,11 @@ const StudentAssessment: React.FC = () => {
     toast.info("Starting assessment...");
   };
 
+  const handleTakeSelfAssessment = () => {
+    navigate("/assessments");
+    toast.success("Create a new self assessment");
+  };
+
   const renderStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
@@ -81,6 +88,13 @@ const StudentAssessment: React.FC = () => {
       <div className="container mx-auto py-8">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold">Student Assessment Dashboard</h1>
+          <Button 
+            onClick={handleTakeSelfAssessment}
+            className="flex items-center gap-2"
+          >
+            <Sparkles className="h-4 w-4" />
+            Take Self Assessment
+          </Button>
         </div>
 
         <div className="grid gap-8">

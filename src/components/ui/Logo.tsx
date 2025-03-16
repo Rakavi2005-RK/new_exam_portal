@@ -43,7 +43,7 @@ const Logo: React.FC<LogoProps> = ({
             "font-bold leading-none",
             size === 'sm' ? 'text-lg' : size === 'md' ? 'text-xl' : 'text-2xl'
           )}>
-            AccessPro
+            AssessPro
           </span>
           <span className="text-xs text-muted-foreground">Assessment Platform</span>
         </div>
