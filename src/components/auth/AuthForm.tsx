@@ -10,10 +10,14 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { ArrowRight, Loader2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+  role: z.enum(["admin", "faculty", "student"], { 
+    required_error: "Please select a role" 
+  }).optional(),
 });
 
 const registerSchema = z.object({
@@ -21,6 +25,9 @@ const registerSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
   confirmPassword: z.string().min(6, { message: "Confirm password must be at least 6 characters" }),
+  role: z.enum(["admin", "faculty", "student"], { 
+    required_error: "Please select a role" 
+  }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
@@ -43,6 +50,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ defaultTab = 'login' }) => {
     defaultValues: {
       email: "",
       password: "",
+      role: undefined,
     },
   });
 
@@ -53,6 +61,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ defaultTab = 'login' }) => {
       email: "",
       password: "",
       confirmPassword: "",
+      role: "student",
     },
   });
 
@@ -65,8 +74,16 @@ const AuthForm: React.FC<AuthFormProps> = ({ defaultTab = 'login' }) => {
       console.log('Login submitted:', values);
       // Success toast
       toast.success('Login successful!');
-      // Redirect to dashboard
-      navigate('/dashboard');
+      
+      // Redirect based on role
+      if (values.role === "faculty") {
+        navigate('/assessments');
+      } else if (values.role === "student") {
+        navigate('/course-catalog');
+      } else {
+        // Default to dashboard for admin or if role is not specified
+        navigate('/dashboard');
+      }
     } catch (error) {
       toast.error('Login failed. Please check your credentials.');
     } finally {
@@ -83,8 +100,16 @@ const AuthForm: React.FC<AuthFormProps> = ({ defaultTab = 'login' }) => {
       console.log('Register submitted:', values);
       // Success toast
       toast.success('Registration successful!');
-      // Redirect to dashboard
-      navigate('/dashboard');
+      
+      // Redirect based on role
+      if (values.role === "faculty") {
+        navigate('/assessments');
+      } else if (values.role === "student") {
+        navigate('/course-catalog');
+      } else {
+        // Default to dashboard for admin
+        navigate('/dashboard');
+      }
     } catch (error) {
       toast.error('Registration failed. Please try again.');
     } finally {
@@ -148,6 +173,32 @@ const AuthForm: React.FC<AuthFormProps> = ({ defaultTab = 'login' }) => {
                 )}
               />
               
+              <FormField
+                control={loginForm.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="h-11">
+                          <SelectValue placeholder="Select your role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="faculty">Faculty</SelectItem>
+                        <SelectItem value="student">Student</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <Button 
                 type="submit" 
                 className="w-full h-11" 
@@ -199,6 +250,32 @@ const AuthForm: React.FC<AuthFormProps> = ({ defaultTab = 'login' }) => {
                         {...field} 
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={registerForm.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="h-11">
+                          <SelectValue placeholder="Select your role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="faculty">Faculty</SelectItem>
+                        <SelectItem value="student">Student</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
