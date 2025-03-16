@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { CheckCircle2, Clock, XCircle, AlertTriangle } from 'lucide-react';
 
 interface Activity {
   id: string;
@@ -15,8 +15,8 @@ interface Activity {
     avatar?: string;
     initials: string;
   };
-  status?: 'completed' | 'pending' | 'failed';
-  type: 'assessment' | 'user' | 'system';
+  status?: 'completed' | 'pending' | 'failed' | 'warning';
+  type: 'assessment' | 'user' | 'system' | 'alert';
   description?: string;
 }
 
@@ -41,6 +41,8 @@ const ActivityList: React.FC<ActivityListProps> = ({
         return <Clock className="h-4 w-4 text-amber-500" />;
       case 'failed':
         return <XCircle className="h-4 w-4 text-red-500" />;
+      case 'warning':
+        return <AlertTriangle className="h-4 w-4 text-amber-500" />;
       default:
         return null;
     }
@@ -54,6 +56,8 @@ const ActivityList: React.FC<ActivityListProps> = ({
         return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
       case 'system':
         return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
+      case 'alert':
+        return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
     }
