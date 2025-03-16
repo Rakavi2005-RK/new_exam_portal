@@ -79,7 +79,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ defaultTab = 'login' }) => {
       if (values.role === "faculty") {
         navigate('/assessments');
       } else if (values.role === "student") {
-        navigate('/course-catalog');
+        navigate('/student-assessments'); // Changed from course-catalog to student-assessments
       } else {
         // Default to dashboard for admin or if role is not specified
         navigate('/dashboard');
@@ -105,7 +105,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ defaultTab = 'login' }) => {
       if (values.role === "faculty") {
         navigate('/assessments');
       } else if (values.role === "student") {
-        navigate('/course-catalog');
+        navigate('/student-assessments'); // Changed from course-catalog to student-assessments
       } else {
         // Default to dashboard for admin
         navigate('/dashboard');
