@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { FileText, Plus, Search } from "lucide-react";
 import AssessmentGenerator from "@/components/assessments/AssessmentGenerator";
+import QuestionGenerator from "@/components/assessments/QuestionGenerator";
 import { toast } from "sonner";
 
 interface AssessmentsProps {
@@ -18,6 +19,7 @@ interface AssessmentsProps {
 const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'faculty' }) => {
   const [activeTab, setActiveTab] = useState<string>("active");
   const [showGenerator, setShowGenerator] = useState(false);
+  const [showQuestionGenerator, setShowQuestionGenerator] = useState(false);
   
   // Mock assessment data
   const assessments = [
@@ -53,22 +55,41 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'faculty' }) => {
               : 'Faculty Assessment Dashboard'}
           </h1>
           {userRole !== 'admin' && (
-            <Dialog open={showGenerator} onOpenChange={setShowGenerator}>
-              <DialogTrigger asChild>
-                <Button className="flex items-center">
-                  <Plus className="mr-2 h-4 w-4" /> Create New Assessment
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[900px]">
-                <DialogHeader>
-                  <DialogTitle>Create New Assessment</DialogTitle>
-                  <DialogDescription>
-                    Use our AI-powered assessment generator to create a new assessment.
-                  </DialogDescription>
-                </DialogHeader>
-                <AssessmentGenerator />
-              </DialogContent>
-            </Dialog>
+            <div className="flex gap-2">
+              <Dialog open={showGenerator} onOpenChange={setShowGenerator}>
+                <DialogTrigger asChild>
+                  <Button className="flex items-center">
+                    <Plus className="mr-2 h-4 w-4" /> Create New Assessment
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[900px]">
+                  <DialogHeader>
+                    <DialogTitle>Create New Assessment</DialogTitle>
+                    <DialogDescription>
+                      Use our AI-powered assessment generator to create a new assessment.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <AssessmentGenerator />
+                </DialogContent>
+              </Dialog>
+              
+              <Dialog open={showQuestionGenerator} onOpenChange={setShowQuestionGenerator}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="flex items-center">
+                    <FileText className="mr-2 h-4 w-4" /> Generate Questions
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[900px]">
+                  <DialogHeader>
+                    <DialogTitle>AI Question Generator</DialogTitle>
+                    <DialogDescription>
+                      Generate questions from a syllabus using AI technology.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <QuestionGenerator />
+                </DialogContent>
+              </Dialog>
+            </div>
           )}
         </div>
 

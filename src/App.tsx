@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
 import Assessments from "./pages/Assessments";
 import StudentAssessment from "./pages/StudentAssessment";
+import TakeAssessment from "./pages/TakeAssessment";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/users" element={<Users />} />
           <Route path="/assessments" element={<Assessments />} />
           <Route path="/student-assessments" element={<StudentAssessment />} />
+          <Route path="/take-assessment/:id" element={<TakeAssessment />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

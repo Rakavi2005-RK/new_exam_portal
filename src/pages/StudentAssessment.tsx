@@ -1,5 +1,5 @@
-
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -62,10 +62,7 @@ const StudentAssessment: React.FC = () => {
   const filteredAssessments = assessments.filter(assessment => assessment.status === activeTab);
 
   const handleStartAssessment = (id: number) => {
-    toast.info("Starting assessment...", {
-      description: "This functionality would navigate to the assessment taking interface"
-    });
-    console.log("Starting assessment with ID:", id);
+    toast.info("Starting assessment...");
   };
 
   const renderStatusBadge = (status: string) => {
@@ -135,7 +132,8 @@ const StudentAssessment: React.FC = () => {
                               <Button 
                                 variant="default" 
                                 size="sm"
-                                onClick={() => handleStartAssessment(assessment.id)}
+                                component={Link}
+                                to={`/take-assessment/${assessment.id}`}
                               >
                                 Start <ChevronRight className="ml-1 h-4 w-4" />
                               </Button>
