@@ -123,7 +123,7 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'class-faculty' })
                 <Dialog open={showAptitudeGenerator} onOpenChange={setShowAptitudeGenerator}>
                   <DialogTrigger asChild>
                     <Button variant="secondary" className="flex items-center">
-                      <LightBulb className="mr-2 h-4 w-4" /> Create Aptitude Assessment
+                      <Lightbulb className="mr-2 h-4 w-4" /> Create Aptitude Assessment
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[900px]">
