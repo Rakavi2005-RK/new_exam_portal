@@ -13,6 +13,7 @@ import Users from "./pages/Users";
 import Assessments from "./pages/Assessments";
 import StudentAssessment from "./pages/StudentAssessment";
 import TakeAssessment from "./pages/TakeAssessment";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/assessments" element={<Assessments />} />
           <Route path="/student-assessments" element={<StudentAssessment />} />
           <Route path="/take-assessment/:id" element={<TakeAssessment />} />
+          <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
