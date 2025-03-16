@@ -14,6 +14,7 @@ import Assessments from "./pages/Assessments";
 import StudentAssessment from "./pages/StudentAssessment";
 import TakeAssessment from "./pages/TakeAssessment";
 import Settings from "./pages/Settings";
+import Analytics from "./pages/Analytics";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/student-assessments" element={<StudentAssessment />} />
           <Route path="/take-assessment/:id" element={<TakeAssessment />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/analytics" element={<Analytics />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
