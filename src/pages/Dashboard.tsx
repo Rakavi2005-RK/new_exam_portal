@@ -16,6 +16,83 @@ const Dashboard: React.FC = () => {
     email: 'vishnu@accesspro.edu',
   };
 
+  // Mock data for ActivityList
+  const mockActivities = [
+    {
+      id: '1',
+      title: 'Assessment Created',
+      time: '30 minutes ago',
+      user: {
+        name: 'John Doe',
+        initials: 'JD',
+      },
+      status: 'completed' as const,
+      type: 'assessment' as const,
+      description: 'Created a new assessment for Mathematics - Calculus'
+    },
+    {
+      id: '2',
+      title: 'New Student Registered',
+      time: '2 hours ago',
+      user: {
+        name: 'Jane Smith',
+        initials: 'JS',
+      },
+      type: 'user' as const,
+    },
+    {
+      id: '3',
+      title: 'Assessment Completed',
+      time: '1 day ago',
+      user: {
+        name: 'Alex Johnson',
+        initials: 'AJ',
+      },
+      status: 'completed' as const,
+      type: 'assessment' as const,
+      description: 'Scored 85% on Physics - Mechanics'
+    },
+    {
+      id: '4',
+      title: 'Group Created',
+      time: '2 days ago',
+      user: {
+        name: 'Sarah Williams',
+        initials: 'SW',
+      },
+      type: 'system' as const,
+      description: 'Created a new group "Computer Science 101"'
+    },
+    {
+      id: '5',
+      title: 'Assessment Assigned',
+      time: '3 days ago',
+      user: {
+        name: 'Robert Brown',
+        initials: 'RB',
+      },
+      status: 'pending' as const,
+      type: 'assessment' as const,
+      description: 'Assigned English Literature quiz to 30 students'
+    }
+  ];
+
+  // Mock data for ProgressChart
+  const chartData = [
+    { name: 'Jan', math: 65, science: 75, english: 60 },
+    { name: 'Feb', math: 70, science: 80, english: 65 },
+    { name: 'Mar', math: 75, science: 85, english: 70 },
+    { name: 'Apr', math: 80, science: 90, english: 75 },
+    { name: 'May', math: 85, science: 88, english: 80 },
+    { name: 'Jun', math: 90, science: 85, english: 85 },
+  ];
+
+  const chartSeries = [
+    { name: 'Mathematics', dataKey: 'math', color: '#3b82f6' },
+    { name: 'Science', dataKey: 'science', color: '#10b981' },
+    { name: 'English', dataKey: 'english', color: '#f59e0b' },
+  ];
+
   return (
     <MainLayout>
       <div className="container py-6 space-y-8 animate-fade-in">
@@ -40,7 +117,11 @@ const Dashboard: React.FC = () => {
                   <CardTitle>Recent Activity</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ActivityList limit={5} />
+                  <ActivityList 
+                    activities={mockActivities}
+                    title="Recent Activity"
+                    description="Latest actions across your institution"
+                  />
                 </CardContent>
               </Card>
               
@@ -49,7 +130,12 @@ const Dashboard: React.FC = () => {
                   <CardTitle>Assessment Performance</CardTitle>
                 </CardHeader>
                 <CardContent className="h-[300px]">
-                  <ProgressChart />
+                  <ProgressChart 
+                    data={chartData}
+                    series={chartSeries}
+                    title="Performance Trends"
+                    description="Average scores across subjects"
+                  />
                 </CardContent>
               </Card>
             </div>
