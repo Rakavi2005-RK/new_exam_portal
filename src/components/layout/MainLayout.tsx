@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Home, FileText, BarChart3, Users, Settings, LogOut, Sun, Moon, BellRing } from 'lucide-react';
+import { Menu, Home, FileText, BarChart3, Users, Settings, LogOut, Sun, Moon, BellRing, Code } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
@@ -62,6 +62,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     { title: 'Assessments', href: '/assessments', icon: <FileText className="h-5 w-5" /> },
     { title: 'Groups', href: '/groups', icon: <Users className="h-5 w-5" /> },
     { title: 'Analytics', href: '/analytics', icon: <BarChart3 className="h-5 w-5" /> },
+    { title: 'Code Generator', href: '/code-generator', icon: <Code className="h-5 w-5" /> },
     { title: 'Users', href: '/users', icon: <Users className="h-5 w-5" />, roles: ['admin', 'super-admin'] },
     { title: 'Settings', href: '/settings', icon: <Settings className="h-5 w-5" /> }
   ];
