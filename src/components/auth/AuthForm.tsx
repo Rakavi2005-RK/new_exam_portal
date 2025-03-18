@@ -1,345 +1,181 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
-import { ArrowRight, Loader2 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
+import { useState } from "react"
+import { useSearchParams } from 'react-router-dom';
 
-const loginSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
-  role: z.enum(["admin", "placement-faculty", "class-faculty", "student"], { 
-    required_error: "Please select a role" 
-  }).optional(),
-});
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { toast } from "@/components/ui/toast"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
-const registerSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
-  confirmPassword: z.string().min(6, { message: "Confirm password must be at least 6 characters" }),
-  role: z.enum(["admin", "placement-faculty", "class-faculty", "student"], { 
-    required_error: "Please select a role" 
+const FormSchema = z.object({
+  email: z.string().email({
+    message: "Please enter a valid email address.",
   }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
-});
+  password: z.string().min(8, {
+    message: "Password must be at least 8 characters.",
+  }),
+  role: z.enum(["admin", "placement-faculty", "class-faculty", "student"]),
+})
 
-type LoginFormValues = z.infer<typeof loginSchema>;
-type RegisterFormValues = z.infer<typeof registerSchema>;
+type FormData = z.infer<typeof FormSchema>
 
-interface AuthFormProps {
-  defaultTab?: 'login' | 'register';
-}
+export function AuthForm() {
+  const [isRegister, setIsRegister] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const isLoginPage = searchParams.get('mode') === 'login';
 
-const AuthForm: React.FC<AuthFormProps> = ({ defaultTab = 'login' }) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState<'login' | 'register'>(defaultTab);
-  const navigate = useNavigate();
-
-  const loginForm = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<FormData>({
+    resolver: zodResolver(FormSchema),
     defaultValues: {
       email: "",
       password: "",
-      role: undefined,
-    },
-  });
-
-  const registerForm = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
       role: "student",
     },
-  });
+    mode: "onChange",
+  })
 
-  const handleLoginSubmit = async (values: LoginFormValues) => {
-    setIsSubmitting(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
+  const { isValid, isValidating, handleSubmit } = form.formState
+
+  const handleSubmit = async (data: FormData) => {
+    setIsLoading(true);
     try {
-      console.log('Login submitted:', values);
-      // Success toast
-      toast.success('Login successful!');
-      
-      // Redirect based on role
-      if (values.role === "faculty" || values.role === "placement-faculty" || values.role === "class-faculty") {
-        navigate('/assessments');
-      } else if (values.role === "student") {
-        navigate('/student/assessments');
+      if (isRegister) {
+        // Call register API
+        console.log("Register data", data);
+        toast.success("Account created successfully!");
+        setIsRegister(false);
       } else {
-        // Default to dashboard for admin or if role is not specified
-        navigate('/dashboard');
+        // Call login API
+        console.log("Login data", data);
+        
+        // Simulate login and redirect based on role
+        if (data.role === "admin") {
+          // Redirect to admin dashboard
+          window.location.href = "/dashboard";
+        } else if (data.role === "placement-faculty") {
+          // Redirect to placement faculty dashboard
+          window.location.href = "/dashboard";
+        } else if (data.role === "class-faculty") {
+          // Redirect to class faculty dashboard
+          window.location.href = "/dashboard";
+        } else if (data.role === "student") {
+          // Redirect to student dashboard
+          window.location.href = "/student/assessments";
+        } else {
+          // Default redirect
+          window.location.href = "/dashboard";
+        }
       }
     } catch (error) {
-      toast.error('Login failed. Please check your credentials.');
+      console.error(error);
+      toast.error("An error occurred. Please try again.");
     } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleRegisterSubmit = async (values: RegisterFormValues) => {
-    setIsSubmitting(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    try {
-      console.log('Register submitted:', values);
-      // Success toast
-      toast.success('Registration successful!');
-      
-      // Redirect based on role
-      if (values.role === "faculty" || values.role === "placement-faculty" || values.role === "class-faculty") {
-        navigate('/assessments');
-      } else if (values.role === "student") {
-        navigate('/student/assessments');
-      } else {
-        // Default to dashboard for admin
-        navigate('/dashboard');
-      }
-    } catch (error) {
-      toast.error('Registration failed. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto animate-fade-in-up">
-      <Tabs
-        defaultValue={defaultTab}
-        value={activeTab}
-        onValueChange={(value) => setActiveTab(value as 'login' | 'register')}
-        className="w-full"
+    <Form {...form}>
+      <form
+        onSubmit={handleSubmit}
+        className="grid w-full max-w-sm items-center gap-4"
       >
-        <TabsList className="grid w-full grid-cols-2 mb-8">
-          <TabsTrigger value="login">Login</TabsTrigger>
-          <TabsTrigger value="register">Register</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="login" className="mt-4">
-          <Form {...loginForm}>
-            <form onSubmit={loginForm.handleSubmit(handleLoginSubmit)} className="space-y-6">
-              <FormField
-                control={loginForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input placeholder="mail@example.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {!isLoginPage && (
+          <FormField
+            control={form.control}
+            name="role"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Role</FormLabel>
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  className="flex flex-col space-y-1"
+                >
+                  <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
-                      <Input 
-                        placeholder="your@email.com" 
-                        type="email" 
-                        autoComplete="email"
-                        className="h-11" 
-                        {...field} 
-                      />
+                      <RadioGroupItem value="student" id="student" />
                     </FormControl>
-                    <FormMessage />
+                    <FormLabel htmlFor="student">Student</FormLabel>
                   </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={loginForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
+                  <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
-                      <Input 
-                        placeholder="********" 
-                        type="password" 
-                        autoComplete="current-password"
-                        className="h-11" 
-                        {...field} 
-                      />
+                      <RadioGroupItem value="class-faculty" id="class-faculty" />
                     </FormControl>
-                    <FormMessage />
+                    <FormLabel htmlFor="class-faculty">Class Faculty</FormLabel>
                   </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={loginForm.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Role</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="h-11">
-                          <SelectValue placeholder="Select your role" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="placement-faculty">Placement Faculty</SelectItem>
-                        <SelectItem value="class-faculty">Class Faculty</SelectItem>
-                        <SelectItem value="student">Student</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <Button 
-                type="submit" 
-                className="w-full h-11" 
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <>Log in <ArrowRight className="ml-2 h-4 w-4" /></>
-                )}
-              </Button>
-            </form>
-          </Form>
-        </TabsContent>
-        
-        <TabsContent value="register" className="mt-4">
-          <Form {...registerForm}>
-            <form onSubmit={registerForm.handleSubmit(handleRegisterSubmit)} className="space-y-6">
-              <FormField
-                control={registerForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
+                  <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
-                      <Input 
-                        placeholder="John Doe" 
-                        className="h-11" 
-                        {...field} 
-                      />
+                      <RadioGroupItem value="placement-faculty" id="placement-faculty" />
                     </FormControl>
-                    <FormMessage />
+                    <FormLabel htmlFor="placement-faculty">
+                      Placement Faculty
+                    </FormLabel>
                   </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={registerForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
+                  <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
-                      <Input 
-                        placeholder="your@email.com" 
-                        type="email" 
-                        autoComplete="email"
-                        className="h-11" 
-                        {...field} 
-                      />
+                      <RadioGroupItem value="admin" id="admin" />
                     </FormControl>
-                    <FormMessage />
+                    <FormLabel htmlFor="admin">Admin</FormLabel>
                   </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={registerForm.control}
-                name="role"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Role</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="h-11">
-                          <SelectValue placeholder="Select your role" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="placement-faculty">Placement Faculty</SelectItem>
-                        <SelectItem value="class-faculty">Class Faculty</SelectItem>
-                        <SelectItem value="student">Student</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={registerForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="********" 
-                        type="password" 
-                        autoComplete="new-password"
-                        className="h-11" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={registerForm.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="********" 
-                        type="password" 
-                        autoComplete="new-password"
-                        className="h-11" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <Button 
-                type="submit" 
-                className="w-full h-11" 
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <>Create account <ArrowRight className="ml-2 h-4 w-4" /></>
-                )}
-              </Button>
-            </form>
-          </Form>
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-};
-
-export default AuthForm;
-
+                </RadioGroup>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+        <Button disabled={isLoading || !isValid}>
+          {isLoading ? "Loading" : isRegister ? "Create Account" : "Login"}
+        </Button>
+        <Button
+          type="button"
+          variant="link"
+          size="sm"
+          onClick={() => setIsRegister(!isRegister)}
+        >
+          {isRegister
+            ? "Already have an account? Login"
+            : "Don't have an account? Register"}
+        </Button>
+      </form>
+    </Form>
+  )
+}
