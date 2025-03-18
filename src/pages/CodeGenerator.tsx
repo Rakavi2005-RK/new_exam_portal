@@ -144,42 +144,43 @@ Output: [1, 2, 3, 4, 5, 6, 7, 8, 9]`;
           </CardHeader>
           <CardContent>
             <div className="grid gap-4">
-              <div className="grid gap-2">
-                <label htmlFor="query" className="font-medium">Problem Statement</label>
-                <Textarea
-                  id="query"
-                  placeholder="Describe what you want the code to do..."
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  rows={5}
-                  className="resize-none"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-2">
+                  <label htmlFor="query" className="font-medium mb-2 block">Problem Statement</label>
+                  <Textarea
+                    id="query"
+                    placeholder="Describe what you want the code to do..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    rows={4}
+                    className="resize-none"
+                  />
+                </div>
+                
+                <div className="flex flex-col">
+                  <label htmlFor="language" className="font-medium mb-2 block">Programming Language</label>
+                  <Select onValueChange={setLanguage} value={language}>
+                    <SelectTrigger id="language" className="mb-auto">
+                      <SelectValue placeholder="Select a language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {languages.map((lang) => (
+                        <SelectItem key={lang} value={lang}>
+                          {lang}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button 
+                    onClick={handleGenerate} 
+                    disabled={isGenerating}
+                    className="mt-4"
+                  >
+                    {isGenerating ? "Generating..." : "Generate Code"}
+                    <Lightbulb className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-              
-              <div className="grid gap-2">
-                <label htmlFor="language" className="font-medium">Programming Language</label>
-                <Select onValueChange={setLanguage} value={language}>
-                  <SelectTrigger id="language">
-                    <SelectValue placeholder="Select a language" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {languages.map((lang) => (
-                      <SelectItem key={lang} value={lang}>
-                        {lang}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <Button 
-                onClick={handleGenerate} 
-                disabled={isGenerating}
-                className="w-full md:w-auto"
-              >
-                {isGenerating ? "Generating..." : "Generate Code"}
-                <Lightbulb className="ml-2 h-4 w-4" />
-              </Button>
             </div>
           </CardContent>
         </Card>
