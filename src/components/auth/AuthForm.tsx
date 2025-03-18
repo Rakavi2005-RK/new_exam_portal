@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -15,7 +16,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { toast } from "@/components/ui/toast"
+import { toast } from "@/hooks/use-toast"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 const FormSchema = z.object({
@@ -30,10 +31,10 @@ const FormSchema = z.object({
 
 type FormData = z.infer<typeof FormSchema>
 
-export function AuthForm() {
-  const [isRegister, setIsRegister] = useState(false)
+export function AuthForm({ defaultTab = "login" }) {
+  const [isRegister, setIsRegister] = useState(defaultTab === "register")
   const [isLoading, setIsLoading] = useState(false);
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const isLoginPage = searchParams.get('mode') === 'login';
 
   const form = useForm<FormData>({
@@ -46,15 +47,18 @@ export function AuthForm() {
     mode: "onChange",
   })
 
-  const { isValid, isValidating, handleSubmit } = form.formState
+  const { isValid, isValidating } = form.formState;
 
-  const handleSubmit = async (data: FormData) => {
+  const onSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
       if (isRegister) {
         // Call register API
         console.log("Register data", data);
-        toast.success("Account created successfully!");
+        toast({
+          title: "Success",
+          description: "Account created successfully!",
+        });
         setIsRegister(false);
       } else {
         // Call login API
@@ -80,7 +84,11 @@ export function AuthForm() {
       }
     } catch (error) {
       console.error(error);
-      toast.error("An error occurred. Please try again.");
+      toast({
+        title: "Error",
+        description: "An error occurred. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -89,7 +97,7 @@ export function AuthForm() {
   return (
     <Form {...form}>
       <form
-        onSubmit={handleSubmit}
+        onSubmit={form.handleSubmit(onSubmit)}
         className="grid w-full max-w-sm items-center gap-4"
       >
         <FormField

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
-import AuthForm from '@/components/auth/AuthForm';
+import { AuthForm } from '@/components/auth/AuthForm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const Register: React.FC = () => {
