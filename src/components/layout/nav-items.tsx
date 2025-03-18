@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, FileText, BarChart3, Users, Settings, Code } from 'lucide-react';
+import { Home, FileText, BarChart3, Users, Settings, Code, MessageCircle } from 'lucide-react';
 
 export interface NavItem {
   title: string;
@@ -16,5 +16,6 @@ export const navItems: NavItem[] = [
   { title: 'Analytics', href: '/analytics', icon: <BarChart3 className="h-5 w-5" /> },
   { title: 'Code Generator', href: '/code-generator', icon: <Code className="h-5 w-5" /> },
   { title: 'Users', href: '/users', icon: <Users className="h-5 w-5" />, roles: ['admin', 'super-admin'] },
+  { title: 'Feedback', href: '/feedback', icon: <MessageCircle className="h-5 w-5" /> },
   { title: 'Settings', href: '/settings', icon: <Settings className="h-5 w-5" /> }
 ];

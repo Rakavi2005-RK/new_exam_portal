@@ -17,6 +17,7 @@ import TakeAssessment from './pages/TakeAssessment';
 import StudentAssessment from './pages/StudentAssessment';
 import Groups from './pages/Groups';
 import CodeGenerator from './pages/CodeGenerator';
+import Feedback from './pages/Feedback';
 
 const App: React.FC = () => {
   return (
@@ -34,6 +35,7 @@ const App: React.FC = () => {
         <Route path="/take-assessment/:id" element={<TakeAssessment />} />
         <Route path="/student/assessments" element={<StudentAssessment />} />
         <Route path="/code-generator" element={<CodeGenerator />} />
+        <Route path="/feedback" element={<Feedback />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
