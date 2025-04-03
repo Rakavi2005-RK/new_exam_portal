@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Brain, Target, Users, Calendar, Award, BookOpen } from 'lucide-react';
+import { Target, Award } from 'lucide-react';
 import CustomCard from '@/components/ui/CustomCard';
 
 interface StatCardProps {
@@ -59,118 +58,26 @@ const StatCard: React.FC<StatCardProps> = ({
   );
 };
 
-interface DashboardStatsProps {
-  className?: string;
-  role?: 'admin' | 'faculty' | 'student';
-}
-
-const DashboardStats: React.FC<DashboardStatsProps> = ({
-  className,
-  role = 'admin'
-}) => {
-  // Conditionally render stats based on user role
-  let stats: StatCardProps[] = [];
-  
-  switch (role) {
-    case 'admin':
-      stats = [
-        {
-          title: 'Total Students',
-          value: '2,543',
-          description: '142 new this month',
-          icon: <Users className="h-5 w-5" />,
-          trend: { value: 12, isPositive: true }
-        },
-        {
-          title: 'Active Assessments',
-          value: '128',
-          description: 'Across all departments',
-          icon: <Target className="h-5 w-5" />,
-          trend: { value: 8, isPositive: true }
-        },
-        {
-          title: 'AI Generated',
-          value: '756',
-          description: 'Assessments created with AI',
-          icon: <Brain className="h-5 w-5" />,
-          trend: { value: 24, isPositive: true }
-        },
-        {
-          title: 'Completion Rate',
-          value: '87%',
-          description: 'Of assigned assessments',
-          icon: <Award className="h-5 w-5" />,
-          trend: { value: 3, isPositive: true }
-        }
-      ];
-      break;
-      
-    case 'faculty':
-      stats = [
-        {
-          title: 'My Students',
-          value: '124',
-          description: 'In your classes',
-          icon: <Users className="h-5 w-5" />,
-        },
-        {
-          title: 'Active Assessments',
-          value: '16',
-          description: 'Created by you',
-          icon: <BookOpen className="h-5 w-5" />,
-          trend: { value: 4, isPositive: true }
-        },
-        {
-          title: 'Average Score',
-          value: '72%',
-          description: 'Across all assessments',
-          icon: <Target className="h-5 w-5" />,
-          trend: { value: 2, isPositive: true }
-        },
-        {
-          title: 'Due This Week',
-          value: '5',
-          description: 'Assessments closing soon',
-          icon: <Calendar className="h-5 w-5" />,
-        }
-      ];
-      break;
-      
-    case 'student':
-      stats = [
-        {
-          title: 'Pending Assessments',
-          value: '4',
-          description: 'Due this week',
-          icon: <Calendar className="h-5 w-5" />,
-        },
-        {
-          title: 'Completed',
-          value: '28',
-          description: 'Assessments this semester',
-          icon: <Award className="h-5 w-5" />,
-          trend: { value: 6, isPositive: true }
-        },
-        {
-          title: 'Average Score',
-          value: '76%',
-          description: 'Across all subjects',
-          icon: <Target className="h-5 w-5" />,
-          trend: { value: 5, isPositive: true }
-        },
-        {
-          title: 'Self Practice',
-          value: '12',
-          description: 'AI assessments generated',
-          icon: <Brain className="h-5 w-5" />,
-          trend: { value: 3, isPositive: true }
-        }
-      ];
-      break;
-  }
+const DashboardStats: React.FC = () => {
+  const stats = [
+    {
+      title: 'Active Assessments',
+      value: '128',
+      description: 'Across all departments',
+      icon: <Target className="h-5 w-5" />,
+      trend: { value: 8, isPositive: true }
+    },
+    {
+      title: 'Completion Rate',
+      value: '87%',
+      description: 'Of assigned assessments',
+      icon: <Award className="h-5 w-5" />,
+      trend: { value: 3, isPositive: true }
+    }
+  ];
 
   return (
-    <div className={cn("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4", className)}>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       {stats.map((stat, index) => (
         <StatCard
           key={index}

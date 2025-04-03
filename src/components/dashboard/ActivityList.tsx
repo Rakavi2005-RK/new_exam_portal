@@ -1,8 +1,6 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CheckCircle2, Clock, XCircle, AlertTriangle } from 'lucide-react';
 
@@ -48,21 +46,6 @@ const ActivityList: React.FC<ActivityListProps> = ({
     }
   };
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'assessment':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-      case 'user':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
-      case 'system':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
-      case 'alert':
-        return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
-    }
-  };
-
   return (
     <Card className={cn("", className)}>
       <CardHeader>
@@ -89,9 +72,6 @@ const ActivityList: React.FC<ActivityListProps> = ({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium">{activity.title}</p>
-                    <Badge variant="outline" className={cn("text-xs", getTypeColor(activity.type))}>
-                      {activity.type}
-                    </Badge>
                   </div>
                   <div className="flex items-center gap-2">
                     {activity.status && getStatusIcon(activity.status)}

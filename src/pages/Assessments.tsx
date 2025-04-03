@@ -107,24 +107,6 @@ const Assessments: React.FC<AssessmentsProps> = ({ userRole = 'class-faculty' })
                       Use our AI-powered assessment generator to create a new assessment.
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="mb-4">
-                    <label className="text-sm font-medium">Target Group</label>
-                    <Select 
-                      value={generatorSelectedGroup}
-                      onValueChange={setGeneratorSelectedGroup}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a group" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {groups.filter(g => g.id !== "all").map((group) => (
-                          <SelectItem key={group.id} value={group.id}>
-                            {group.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
                   <AssessmentGenerator />
                 </DialogContent>
               </Dialog>

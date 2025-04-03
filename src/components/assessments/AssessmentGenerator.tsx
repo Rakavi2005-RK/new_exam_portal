@@ -221,7 +221,7 @@ const AssessmentGenerator: React.FC<AssessmentGeneratorProps> = ({ className }) 
                     )}
                   />
                 </div>
-                
+               {/* 
                 <FormField
                   control={form.control}
                   name="content"
@@ -242,7 +242,7 @@ const AssessmentGenerator: React.FC<AssessmentGeneratorProps> = ({ className }) 
                     </FormItem>
                   )}
                 />
-                
+                */}
                 <Button 
                   type="submit" 
                   className="w-full" 
