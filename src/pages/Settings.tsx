@@ -2,9 +2,9 @@
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import SettingsProfile from '@/components/settings/SettingsProfile';
-import SettingsNotifications from '@/components/settings/SettingsNotifications';
-import SettingsAppearance from '@/components/settings/SettingsAppearance';
+//import SettingsProfile from '@/components/settings/SettingsProfile';
+//import SettingsNotifications from '@/components/settings/SettingsNotifications';
+//import SettingsAppearance from '@/components/settings/SettingsAppearance';
 import SettingsSecurity from '@/components/settings/SettingsSecurity';
 
 const Settings = () => {
@@ -19,15 +19,16 @@ const Settings = () => {
             </p>
           </div>
           
-          <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-8">
-              <TabsTrigger value="profile">Profile</TabsTrigger>
+          {/*<Tabs defaultValue="profile" className="w-full">
+             <TabsList className="grid w-full grid-cols-4 mb-8">
+              {/*<TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="notifications">Notifications</TabsTrigger>
-              <TabsTrigger value="appearance">Appearance</TabsTrigger>
+              <TabsTrigger value="appearance">Appearance</TabsTrigger> 
               <TabsTrigger value="security">Security</TabsTrigger>
-            </TabsList>
+            </TabsList> 
             
-            <TabsContent value="profile" className="space-y-6">
+            
+            {/*<TabsContent value="profile" className="space-y-6">
               <SettingsProfile />
             </TabsContent>
             
@@ -40,9 +41,10 @@ const Settings = () => {
             </TabsContent>
             
             <TabsContent value="security" className="space-y-6">
-              <SettingsSecurity />
+            <SettingsSecurity />
             </TabsContent>
-          </Tabs>
+          </Tabs> */}
+          <SettingsSecurity />
         </div>
       </div>
     </MainLayout>

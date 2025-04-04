@@ -87,13 +87,13 @@ const SettingsSecurity = () => {
 
   return (
     <div className="space-y-6">
-      <div>
+      {/* <div>
         <h3 className="text-lg font-medium">Security</h3>
         <p className="text-sm text-muted-foreground">
           Update your password and manage security settings.
         </p>
       </div>
-      
+       */}
       <Card>
         <CardHeader>
           <CardTitle>Change Password</CardTitle>
