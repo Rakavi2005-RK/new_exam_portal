@@ -39,7 +39,7 @@ const AssessmentGenerator: React.FC<AssessmentGeneratorProps> = ({ className }) 
       subject: "",
       topic: "",
       difficulty: "medium",
-      questionCount: 10,
+      questionCount: 30,
       content: "",
     },
   });
@@ -209,7 +209,7 @@ const AssessmentGenerator: React.FC<AssessmentGeneratorProps> = ({ className }) 
                             type="number" 
                             min={1} 
                             max={50} 
-                            placeholder="10" 
+                            placeholder="30" 
                             {...field} 
                           />
                         </FormControl>
@@ -305,8 +305,8 @@ const AssessmentGenerator: React.FC<AssessmentGeneratorProps> = ({ className }) 
                       type="number" 
                       min={1} 
                       max={50} 
-                      defaultValue={10} 
-                      placeholder="10" 
+                      defaultValue={30} 
+                      placeholder="30" 
                     />
                     <p className="text-xs text-muted-foreground">
                       Choose between 1-50 questions
