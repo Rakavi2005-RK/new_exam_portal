@@ -155,7 +155,7 @@ const SettingsSecurity = () => {
         </CardContent>
       </Card>
       
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
@@ -210,7 +210,7 @@ const SettingsSecurity = () => {
           Last sign in: Yesterday at 15:32 from 192.168.1.1
         </CardFooter>
       </Card>
-      
+       */}
       <Card>
         <CardHeader>
           <CardTitle className="text-destructive">Danger Zone</CardTitle>
