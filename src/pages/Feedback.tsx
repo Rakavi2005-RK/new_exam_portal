@@ -10,10 +10,7 @@ import { toast } from 'sonner';
 
 const feedbackTypes = [
   'Feature Request',
-  'Bug Report',
-  'User Experience',
-  'General Feedback',
-  'Other'
+  'General Feedback'
 ];
 
 const Feedback: React.FC = () => {

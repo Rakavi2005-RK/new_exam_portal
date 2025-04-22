@@ -93,7 +93,7 @@ const AssessmentGenerator: React.FC<AssessmentGeneratorProps> = ({ className }) 
   };
   
   return (
-    <Card className={className}>
+    <Card className={className} >
       <CardHeader>
         <div className="flex items-center gap-2">
           <Brain className="h-5 w-5 text-primary" />
@@ -104,25 +104,18 @@ const AssessmentGenerator: React.FC<AssessmentGeneratorProps> = ({ className }) 
         </CardDescription>
       </CardHeader>
       
-      <CardContent>
+      <CardContent >
         <Tabs 
-          defaultValue="input" 
-          value={activeTab}
-          onValueChange={(value) => setActiveTab(value as 'input' | 'upload')}
-          className="w-full"
+         defaultValue="manual" className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="input">
-              <FileText className="mr-2 h-4 w-4" />
-              Manual Input
-            </TabsTrigger>
-            <TabsTrigger value="upload">
-              <FileUp className="mr-2 h-4 w-4" />
-              Upload Syllabus
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex justify-center mb-4">
+    <TabsList className="bg-muted w-fit">
+      <TabsTrigger value="manual">📋 Manual Input</TabsTrigger>
+    </TabsList>
+  </div>
+  
           
-          <TabsContent value="input" className="space-y-4 animate-fade-in-up">
+          <TabsContent value="manual" className="space-y-4 animate-fade-in-up">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -207,45 +200,19 @@ const AssessmentGenerator: React.FC<AssessmentGeneratorProps> = ({ className }) 
                         <FormControl>
                           <Input 
                             type="number" 
-                            min={1} 
-                            max={50} 
                             placeholder="30" 
                             {...field} 
                           />
                         </FormControl>
-                        <FormDescription>
-                          Choose between 1-50 questions
-                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
-               {/* 
-                <FormField
-                  control={form.control}
-                  name="content"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Additional Content (Optional)</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Paste syllabus content or specific requirements here" 
-                          className="min-h-32" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Optional content to guide AI in generating more relevant questions
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                */}
+           
                 <Button 
                   type="submit" 
-                  className="w-full" 
+                  className="mx-auto w-1/4 flex items-center justify-center" 
                   size="lg"
                   disabled={isGenerating}
                 >
@@ -268,7 +235,7 @@ const AssessmentGenerator: React.FC<AssessmentGeneratorProps> = ({ className }) 
           <TabsContent value="upload" className="space-y-4 animate-fade-in-up">
             <div className="space-y-4">
               <div className="grid w-full max-w-sm items-center gap-1.5">
-                <Label htmlFor="syllabus">Upload Syllabus</Label>
+                
                 <div className="flex items-center gap-2">
                   <Input
                     id="syllabus"

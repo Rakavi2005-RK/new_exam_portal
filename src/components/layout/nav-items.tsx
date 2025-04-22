@@ -10,11 +10,9 @@ export interface NavItem {
 
 export const mainNavItems: NavItem[] = [
   { title: 'Dashboard', href: '/dashboard', icon: <Home className="h-5 w-5" /> },
-  { title: 'Assessments', href: '/assessments', icon: <FileText className="h-5 w-5" /> },
-  { title: 'Groups', href: '/groups', icon: <Users className="h-5 w-5" /> },
   { title: 'Analytics', href: '/analytics', icon: <BarChart3 className="h-5 w-5" /> },
-  { title: 'Code Generator', href: '/code-generator', icon: <Code className="h-5 w-5" /> },
-  { title: 'Users', href: '/users', icon: <Users className="h-5 w-5" />, roles: ['admin', 'super-admin'] }
+  { title: 'Code Generator', href: '/code-generator', icon: <Code className="h-5 w-5" /> }
+ 
 ];
 
 export const bottomNavItems: NavItem[] = [
