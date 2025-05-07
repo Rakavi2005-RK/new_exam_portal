@@ -126,7 +126,7 @@ export function AuthForm({ defaultTab = "login" }) {
             </FormItem>
           )}
         />
-        {!isLoginPage && (
+        {/* {!isLoginPage && (
           <FormField
             control={form.control}
             name="role"
@@ -169,7 +169,33 @@ export function AuthForm({ defaultTab = "login" }) {
               </FormItem>
             )}
           />
-        )}
+        )} */}
+
+{!isLoginPage && (
+  <FormField
+    control={form.control}
+    name="role"
+    render={({ field }) => (
+      <FormItem>
+        <FormLabel>Role</FormLabel>
+        <FormControl>
+          <select
+            className="border rounded px-3 py-2 w-full font-sans text-sm text-gray-800"
+            value={field.value}
+            onChange={field.onChange}
+          >
+            <option value="student">Student</option>
+            <option value="class-faculty">Class Faculty</option>
+            <option value="placement-faculty">Placement Faculty</option>
+            <option value="admin">Admin</option>
+          </select>
+        </FormControl>
+        <FormMessage />
+      </FormItem>
+    )}
+  />
+)}
+
         <Button disabled={isLoading || !isValid}>
           {isLoading ? "Loading" : isRegister ? "Create Account" : "Login"}
         </Button>
