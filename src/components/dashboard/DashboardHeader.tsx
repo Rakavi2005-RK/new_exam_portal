@@ -67,7 +67,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 <DialogHeader>
                   <DialogTitle>Take New Assessment</DialogTitle>
                   <DialogDescription>
-                    Use our AI-powered assessment generator to create a new assessment.
+                    Use our smart assessment generator to create a new assessment
                   </DialogDescription>
                 </DialogHeader>
                 <AssessmentGenerator />

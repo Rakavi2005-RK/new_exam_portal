@@ -97,10 +97,10 @@ const AssessmentGenerator: React.FC<AssessmentGeneratorProps> = ({ className }) 
       <CardHeader>
         <div className="flex items-center gap-2">
           <Brain className="h-5 w-5 text-primary" />
-          <CardTitle>AI Assessment Generator</CardTitle>
+          <CardTitle>Access Pro Assessment Generator</CardTitle>
         </div>
         <CardDescription>
-          Create custom assessments using AI technology
+          Create custom assessments using Access Pro technology
         </CardDescription>
       </CardHeader>
       
@@ -330,7 +330,7 @@ const AssessmentGenerator: React.FC<AssessmentGeneratorProps> = ({ className }) 
       <CardFooter className="flex justify-between text-sm text-muted-foreground">
         <div className="flex items-center gap-1">
           <Brain className="h-4 w-4" />
-          <span>Powered by AI</span>
+          <span>Powered by Access Pro</span>
         </div>
         
         {isGenerating && <span>This may take a few moments...</span>}

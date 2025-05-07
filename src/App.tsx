@@ -6,6 +6,7 @@ import './App.css';
 // Pages
 import Index from './pages/Index';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Assessments from './pages/Assessments';
@@ -25,6 +26,7 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/assessments" element={<Assessments />} />
