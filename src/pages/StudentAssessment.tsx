@@ -25,7 +25,7 @@ const StudentAssessment: React.FC = () => {
       status: "pending",
       totalQuestions: 20,
       timeLimit: 60, // minutes
-      teacher: "Dr. Richard Feynman" 
+      created_at: "2024-10-22" 
     },
     { 
       id: 2, 
@@ -35,7 +35,7 @@ const StudentAssessment: React.FC = () => {
       status: "pending",
       totalQuestions: 15,
       timeLimit: 45,
-      teacher: "Dr. Marie Curie" 
+      created_at: "2024-09-10"
     },
     { 
       id: 3, 
@@ -45,7 +45,7 @@ const StudentAssessment: React.FC = () => {
       status: "completed",
       totalQuestions: 5,
       timeLimit: 120,
-      teacher: "Prof. Jane Austen",
+      created_at: "2024-11-22",
       score: 85 
     },
     { 
@@ -56,7 +56,7 @@ const StudentAssessment: React.FC = () => {
       status: "completed",
       totalQuestions: 10,
       timeLimit: 90,
-      teacher: "Dr. Alan Turing",
+      created_at: "2024-12-02",
       score: 92 
     },
   ];
@@ -123,7 +123,7 @@ const StudentAssessment: React.FC = () => {
                         <TableRow>
                           <TableHead>Title</TableHead>
                           <TableHead>Subject</TableHead>
-                          <TableHead>Teacher</TableHead>
+                          <TableHead>Created at</TableHead>
                           <TableHead>Due Date</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Action</TableHead>
@@ -139,7 +139,7 @@ const StudentAssessment: React.FC = () => {
                               </div>
                             </TableCell>
                             <TableCell>{assessment.subject}</TableCell>
-                            <TableCell>{assessment.teacher}</TableCell>
+                            <TableCell>{assessment.created_at}</TableCell>
                             <TableCell>{assessment.dueDate}</TableCell>
                             <TableCell>{renderStatusBadge(assessment.status)}</TableCell>
                             <TableCell>
@@ -167,7 +167,7 @@ const StudentAssessment: React.FC = () => {
                         <TableRow>
                           <TableHead>Title</TableHead>
                           <TableHead>Subject</TableHead>
-                          <TableHead>Teacher</TableHead>
+                          <TableHead>Created at</TableHead>
                           <TableHead>Score</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Action</TableHead>
@@ -183,7 +183,7 @@ const StudentAssessment: React.FC = () => {
                               </div>
                             </TableCell>
                             <TableCell>{assessment.subject}</TableCell>
-                            <TableCell>{assessment.teacher}</TableCell>
+                            <TableCell>{assessment.created_at}</TableCell>
                             <TableCell>
                               <div className="space-y-1">
                                 <div className="flex items-center justify-between text-sm">

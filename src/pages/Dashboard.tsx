@@ -17,10 +17,10 @@ const Dashboard: React.FC = () => {
   const currentUser = { name: "Alex Johnson", role: "student", email: "alex@student.edu" };
 
   const assessments = [
-    { id: 1, title: "Midterm Physics Assessment", subject: "Physics", dueDate: "2025-04-15", status: "pending", teacher: "Dr. Richard Feynman" },
-    { id: 2, title: "Chemistry Practical Evaluation", subject: "Chemistry", dueDate: "2025-04-20", status: "pending", teacher: "Dr. Marie Curie" },
-    { id: 3, title: "Literature Review Essay", subject: "English", dueDate: "2025-03-30", status: "completed", teacher: "Prof. Jane Austen", score: 85 },
-    { id: 4, title: "Mathematics Problem Set #2", subject: "Mathematics", dueDate: "2025-03-25", status: "completed", teacher: "Dr. Alan Turing", score: 92 },
+    { id: 1, title: "Midterm Physics Assessment", subject: "Physics", dueDate: "2025-04-15", status: "pending", created_at: "2024-10-22" },
+    { id: 2, title: "Chemistry Practical Evaluation", subject: "Chemistry", dueDate: "2025-04-20", status: "pending",created_at: "2024-09-10" },
+    { id: 3, title: "Literature Review Essay", subject: "English", dueDate: "2025-03-30", status: "completed", created_at: "2024-11-22", score: 85 },
+    { id: 4, title: "Mathematics Problem Set #2", subject: "Mathematics", dueDate: "2025-03-25", status: "completed",  created_at: "2024-12-02", score: 92 },
   ];
 
   const filteredAssessments = assessments.filter(assessment => assessment.status === activeTab);
@@ -55,7 +55,7 @@ const Dashboard: React.FC = () => {
                       <TableRow>
                         <TableHead>Title</TableHead>
                         <TableHead>Subject</TableHead>
-                        <TableHead>Teacher</TableHead>
+                        <TableHead>Created at</TableHead>
                         <TableHead>Due Date</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Action</TableHead>
@@ -71,7 +71,7 @@ const Dashboard: React.FC = () => {
                             </div>
                           </TableCell>
                           <TableCell>{assessment.subject}</TableCell>
-                          <TableCell>{assessment.teacher}</TableCell>
+                          <TableCell>{assessment.created_at}</TableCell>
                           <TableCell>{assessment.dueDate}</TableCell>
                           <TableCell>
                             <Badge variant="outline" className={assessment.status === "pending" ? "bg-yellow-50 text-yellow-700 border-yellow-200" : "bg-green-50 text-green-700 border-green-200"}>

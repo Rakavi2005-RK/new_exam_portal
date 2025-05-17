@@ -194,51 +194,51 @@ const Analytics = () => {
             description="Latest assessment activities and alerts"
             className="col-span-2 md:col-span-1" 
           />
-
-          <Card className="col-span-2 md:col-span-1">
-            <CardHeader>
-              <CardTitle>Completion Rates</CardTitle>
-              <CardDescription>Assessment completion statistics</CardDescription>
-            </CardHeader>
-            <CardContent className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={completionData}
-                  margin={{
-                    top: 20,
-                    right: 30,
-                    left: 20,
-                    bottom: 10,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                  <XAxis 
-                    dataKey="name" 
-                    tick={{ fontSize: 12 }} 
-                    tickLine={false} 
-                  />
-                  <YAxis 
-                    tick={{ fontSize: 12 }}
-                    tickLine={false}
-                  />
-                  <Tooltip />
-                  <Legend />
-                  <Bar
-                    dataKey="assigned"
-                    name="Assigned"
-                    fill="#3b82f6"
-                    radius={[4, 4, 0, 0]}
-                  />
-                  <Bar
-                    dataKey="completed"
-                    name="Completed"
-                    fill="#10b981"
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+{/* 
+            <Card className="col-span-2 md:col-span-1">
+              <CardHeader>
+                <CardTitle>Completion Rates</CardTitle>
+                <CardDescription>Assessment completion statistics</CardDescription>
+              </CardHeader>
+              <CardContent className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={completionData}
+                    margin={{
+                      top: 20,
+                      right: 30,
+                      left: 20,
+                      bottom: 10,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                    <XAxis 
+                      dataKey="name" 
+                      tick={{ fontSize: 12 }} 
+                      tickLine={false} 
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12 }}
+                      tickLine={false}
+                    />
+                    <Tooltip />
+                    <Legend />
+                    <Bar
+                      dataKey="assigned"
+                      name="Assigned"
+                      fill="#3b82f6"
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="completed"
+                      name="Completed"
+                      fill="#10b981"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card> */}
         </div>
       </div>
     </MainLayout>

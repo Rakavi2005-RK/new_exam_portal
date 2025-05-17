@@ -32,6 +32,8 @@ const AssessmentGenerator: React.FC<AssessmentGeneratorProps> = ({ className }) 
   const [isGenerating, setIsGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState<'input' | 'upload'>('input');
   const [uploadFileName, setUploadFileName] = useState('');
+  const [showPopup, setShowPopup] = useState(false);
+
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -74,23 +76,26 @@ const AssessmentGenerator: React.FC<AssessmentGeneratorProps> = ({ className }) 
   };
   
   const handleSubmit = async (values: FormValues) => {
-    setIsGenerating(true);
+  setIsGenerating(true);
+  
+  try {
+    await new Promise(resolve => setTimeout(resolve, 2500));
     
-    try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2500));
-      
-      console.log('Assessment generation submitted:', values);
-      
-      // Show success message
-      toast.success('Assessment generated successfully!');
-    } catch (error) {
-      toast.error('Failed to generate assessment. Please try again.');
-      console.error('Error generating assessment:', error);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+    console.log('Assessment generation submitted:', values);
+    toast.success('Assessment generated successfully!');
+    
+    // Show popup after 5 seconds
+    setTimeout(() => {
+      setShowPopup(true);
+    }, 5000);
+  } catch (error) {
+    toast.error('Failed to generate assessment. Please try again.');
+    console.error('Error generating assessment:', error);
+  } finally {
+    setIsGenerating(false);
+  }
+};
+
   
   return (
     <Card className={className} >
@@ -335,8 +340,31 @@ const AssessmentGenerator: React.FC<AssessmentGeneratorProps> = ({ className }) 
         
         {isGenerating && <span>This may take a few moments...</span>}
       </CardFooter>
+
+      {showPopup && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+      <h2 className="text-lg font-semibold mb-2">Assessment Ready</h2>
+      <p className="text-sm text-gray-700 mb-4">
+        Your custom assessment is ready. You can now download or review it.
+      </p>
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" onClick={() => setShowPopup(false)}>
+          Close
+        </Button>
+        <Button onClick={() => setShowPopup(false)}>
+          Proceed
+        </Button>
+      </div>
+    </div>
+  </div>
+    )};
     </Card>
+
+    
+
   );
+
 };
 
 export default AssessmentGenerator;
