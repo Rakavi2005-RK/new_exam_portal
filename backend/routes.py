@@ -60,7 +60,7 @@ def login():
 @routes.route('/send-otp', methods=['POST'])
 def send_otp():
     data = request.json
-    email = data.get("email")
+    email = data.get("emailForReset")
     
     user = User.query.filter_by(email=email).first()
     if not user:
@@ -81,12 +81,13 @@ def send_otp():
 @routes.route('/verify-otp', methods=['POST'])
 def verify_otp():
     data = request.json
-    email = data.get("email")
+    email = data.get("emailForReset")
     otp = data.get("otp")
-
+    print(otp)
+    print(otp_storage)
     if email not in otp_storage or otp_storage[email] != otp:
         return jsonify({"message": "Invalid OTP"}), 400
-
+   
     del otp_storage[email]  
     return jsonify({"message": "OTP verified successfully"}), 200
 
@@ -94,31 +95,32 @@ def verify_otp():
 @routes.route('/reset-password', methods=['POST'])
 def reset_password():
     data=request.json 
-    details=data["data"] 
-    new_password = details["newPassword"]
     # reset-password
     if data["actions"]=="reset_password":
-        email = data["email"]
+        email = data["emailForReset"]
+        new_password=data["newPassword"]
         user = User.query.filter_by(email=email).first()
-        if not user:
-            return jsonify({"message": "User not found!"}), 400
+        """if not user:
+            return jsonify({"message": "User not found!"}), 400"""
         hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
         user.password_hash= hashed_password
         db.session.commit()
     # update-password
     elif  data["actions"]=="update_password":
         id=data["user_id"]
+        details=data["data"] 
+        new_password = details["newPassword"]
         user=User.query.filter_by(id=id).first()
         old_password=details["currentPassword"]
         if not bcrypt.check_password_hash(user.password_hash,old_password):
-            return("password does not match")
+            return jsonify({"message":"password does not match"}),400
     
         hashed=bcrypt.generate_password_hash(new_password).decode('utf-8')
         user.password_hash=hashed
         db.session.commit()
-        return("successful")
+        
     else:
-        return("something went wrong!!!")
+        return jsonify({"message":"something went wrong!!!"}),400
 
 
     return jsonify({"message": "Password reset successful!"}),200
@@ -303,8 +305,6 @@ def feedBack():
                 recipients=[current_app.config["MAIL_USERNAME"]],
                 body=body)
     msg.reply_to=email_id
-    print(current_app.config["MAIL_USERNAME"])
-    print(mail.send(msg))
     try:
         mail.send(msg)
     except Exception as e:
@@ -430,10 +430,13 @@ def delete():
     details=request.json
     user_id=details["user_id"]
     user=User.query.filter_by(id=user_id).first()
-    if  user:
-        db.session.delete(user)
-        db.session.commit()
-    return("successful")
+    try:
+        if  user:
+            db.session.delete(user)
+            db.session.commit()
+    except Exception as e:
+        return jsonify({"message":"Something went wrong!!! Try again"}),400
+    return jsonify(),200
 
 
 
