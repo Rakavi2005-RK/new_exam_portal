@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -11,19 +12,21 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {jwtDecode} from "jwt-decode"; 
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom"; // Add this import to use Link for routing
-
+import axios from 'axios';
 // Extend schema to include role in the login form as well
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
   password: z.string().min(8, { message: "Password must be at least 8 characters." }),
-  role: z.enum(["admin", "placement-faculty", "class-faculty", "student"]),
+  
 });
 
 type LoginData = z.infer<typeof loginSchema>;
+  
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -33,7 +36,6 @@ export function LoginForm() {
     defaultValues: {
       email: "",
       password: "",
-      role: "student", // Set default role to "student"
     },
     mode: "onChange",
   });
@@ -43,20 +45,21 @@ export function LoginForm() {
   const onSubmit = async (data: LoginData) => {
     setIsLoading(true);
     try {
-      console.log("Login data:", data);
-      window.location.href = "/dashboard";
-      // Handle the login API and role-based redirection
-      /*
-      if (data.role === "admin") {
-        window.location.href = "/admin-dashboard";
-      } else if (data.role === "placement-faculty") {
-        window.location.href = "/placement-faculty-dashboard";
-      } else if (data.role === "class-faculty") {
-        window.location.href = "/class-faculty-dashboard";
-      } else if (data.role === "student") {
-        window.location.href = "/student-dashboard";
-      }*/
-    } catch (error) {
+      const res=await axios.post("http://127.0.0.1:5000/login",data,{
+      headers: { "Content-Type": "application/json" },
+      })
+      
+      
+      
+      const { token, success, message } = res.data;
+      if (success && token) {
+        const decoded: any = jwtDecode(token);
+        const userId = decoded.sub.user_id; 
+        localStorage.setItem("user_id", userId);
+        /* console.log("Decoded user_id:", userId);*/
+        window.location.href = "/dashboard";
+    }
+    }catch (error) {
       console.error(error);
       toast({
         title: "Login failed",
@@ -67,6 +70,7 @@ export function LoginForm() {
       setIsLoading(false);
     }
   };
+  
 
   return (
     <Form {...form}>

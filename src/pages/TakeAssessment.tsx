@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AssessmentTaker from "@/components/assessments/AssessmentTaker";
 import { Card, CardContent } from "@/components/ui/card";
-import { toast } from "sonner";
+import { toast } from "sonner"; 
 
 const TakeAssessment: React.FC = () => {
   const navigate = useNavigate();
