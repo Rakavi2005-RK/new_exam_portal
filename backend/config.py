@@ -15,4 +15,5 @@ class Config:
     MAIL_USERNAME = os.getenv("MAIL_USERNAME")
     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
     API_KEY= os.getenv("API_KEY")
+    API_KEY1=os.getenv("API_KEY1")
  
