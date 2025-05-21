@@ -4,24 +4,15 @@ import enum
 from sqlalchemy.dialects.mysql import JSON
 from sqlalchemy import Enum
 from datetime import datetime, timedelta
-<<<<<<< HEAD
 import pytz
 
 
-=======
-from zoneinfo import ZoneInfo
->>>>>>> 12265da7a285c71eabc0a492e3501fcf6d1c715d
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 
-<<<<<<< HEAD
 #for timezone
 tz=pytz.timezone('Asia/Kolkata')
-=======
-
-
->>>>>>> 12265da7a285c71eabc0a492e3501fcf6d1c715d
 #for status 
 class Status(enum.Enum):
     pending = "pending"
@@ -58,11 +49,7 @@ class Score(db.Model):
     subject=db.Column(db.String(100),nullable=False)
     topic=db.Column(db.String(100),nullable=False)
     status=db.Column(Enum(Status),default=Status.pending,nullable=False)
-<<<<<<< HEAD
     time = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(tz))
-=======
-    time = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(ZoneInfo("Asia/Kolkata")))
->>>>>>> 12265da7a285c71eabc0a492e3501fcf6d1c715d
     due_date = db.Column(db.DateTime,nullable=False)
     answer=db.relationship("Question",backref="score",cascade="all, delete-orphan")
     score=db.Column(db.Integer,nullable=True)
@@ -70,11 +57,7 @@ class Score(db.Model):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if not self.due_date:
-<<<<<<< HEAD
             base_time = self.time or datetime.now(tz)
-=======
-            base_time = self.time or datetime.now(ZoneInfo("Asia/Kolkata"))
->>>>>>> 12265da7a285c71eabc0a492e3501fcf6d1c715d
             self.due_date = base_time + timedelta(days=3)
 #question modwl
 class Question(db.Model):
@@ -83,10 +66,5 @@ class Question(db.Model):
     quest_text=db.Column(db.Text,nullable=False)
     choices = db.Column(JSON, nullable=False)
     user_choice=db.Column(db.String(100),nullable=True)
-<<<<<<< HEAD
     is_correct=db.Column(db.String(1),nullable=False)
     time = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(tz))
-=======
-    is_correct=db.Column(db.Boolean,default=False,nullable=True)
-    time = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(ZoneInfo("Asia/Kolkata")))
->>>>>>> 12265da7a285c71eabc0a492e3501fcf6d1c715d
