@@ -1,7 +1,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,9 +61,8 @@ const SettingsSecurity = () => {
       twoFactorAuth: false,
     },
   });
-  const navigate=useNavigate();
   const user_id=localStorage.getItem("user_id");
-// request to update-password
+// api call
  async function onPasswordSubmit(data: PasswordFormValues){
     const actions="update_password"
     
@@ -92,20 +90,18 @@ const SettingsSecurity = () => {
       confirmPassword: "",
     });
   }
-  // request to delete 
+  // delete call
   const onDelete=async() =>{
     try{
       const res=await axios.post("http://127.0.0.1:5000/delete",{user_id})
-      setTimeout(() => {
-      navigate("/login");
-    }, 1000);  
+      if (res)
+      {
+        console.log("successfull")
+      }
     }
     catch(error)
     {
-      toast({
-        title: " Error",
-        description: error.response?.data?.message || "something went wrong"
-      })
+      console.log("error:",error)
     }
 
   }
@@ -118,6 +114,7 @@ const SettingsSecurity = () => {
         "Two-factor authentication has been disabled for your account.",
     });
     
+    console.log(data);
   }
 
   return (

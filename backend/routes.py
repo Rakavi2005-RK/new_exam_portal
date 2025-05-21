@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify,send_file,Response,current_app
 from models import User,feedback,db,bcrypt,Question,Score
 from flask_jwt_extended import create_access_token
 from sqlalchemy.exc import SQLAlchemyError
-from flask_cors import CORS
+from flask_cors import CORS,cross_origin
 from flask_mail import Message
 from datetime import datetime
 import random
@@ -60,7 +60,7 @@ def login():
 @routes.route('/send-otp', methods=['POST'])
 def send_otp():
     data = request.json
-    email = data.get("emailForReset")
+    email = data.get("email")
     
     user = User.query.filter_by(email=email).first()
     if not user:
@@ -81,13 +81,12 @@ def send_otp():
 @routes.route('/verify-otp', methods=['POST'])
 def verify_otp():
     data = request.json
-    email = data.get("emailForReset")
+    email = data.get("email")
     otp = data.get("otp")
-    print(otp)
-    print(otp_storage)
+
     if email not in otp_storage or otp_storage[email] != otp:
         return jsonify({"message": "Invalid OTP"}), 400
-   
+
     del otp_storage[email]  
     return jsonify({"message": "OTP verified successfully"}), 200
 
@@ -95,32 +94,31 @@ def verify_otp():
 @routes.route('/reset-password', methods=['POST'])
 def reset_password():
     data=request.json 
+    details=data["data"] 
+    new_password = details["newPassword"]
     # reset-password
     if data["actions"]=="reset_password":
-        email = data["emailForReset"]
-        new_password=data["newPassword"]
+        email = data["email"]
         user = User.query.filter_by(email=email).first()
-        """if not user:
-            return jsonify({"message": "User not found!"}), 400"""
+        if not user:
+            return jsonify({"message": "User not found!"}), 400
         hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
         user.password_hash= hashed_password
         db.session.commit()
     # update-password
     elif  data["actions"]=="update_password":
         id=data["user_id"]
-        details=data["data"] 
-        new_password = details["newPassword"]
         user=User.query.filter_by(id=id).first()
         old_password=details["currentPassword"]
         if not bcrypt.check_password_hash(user.password_hash,old_password):
-            return jsonify({"message":"password does not match"}),400
+            return("password does not match")
     
         hashed=bcrypt.generate_password_hash(new_password).decode('utf-8')
         user.password_hash=hashed
         db.session.commit()
-        
+        return("successful")
     else:
-        return jsonify({"message":"something went wrong!!!"}),400
+        return("something went wrong!!!")
 
 
     return jsonify({"message": "Password reset successful!"}),200
@@ -305,6 +303,8 @@ def feedBack():
                 recipients=[current_app.config["MAIL_USERNAME"]],
                 body=body)
     msg.reply_to=email_id
+    print(current_app.config["MAIL_USERNAME"])
+    print(mail.send(msg))
     try:
         mail.send(msg)
     except Exception as e:
@@ -351,21 +351,23 @@ def generate_assessment():
                 "question_text": "What is the capital of France?",
                 "topic": "Geography",
                 "choices": [
-                {{"text": "Paris", "is_correct": true}},
-                {{"text": "Berlin", "is_correct": false}},
-                {{"text": "London", "is_correct": false}},
-                {{"text": "Madrid", "is_correct": false}}
-                ]
+                {{"id":"a","text": "Paris"}},
+                {{"id":"b","text": "Berlin"}},
+                {{"id":"c","text": "London"}},
+                {{"id":"d","text": "Madrid"}}
+                ],
+                "is_correct":"a" 
             }},
             {{
                 "question_text": "Who invented Python?",
                 "topic": "Programming",
                 "choices": [
-                {{"text": "Guido van Rossum", "is_correct": true}},
-                {{"text": "James Gosling", "is_correct": false}},
-                {{"text": "Bjarne Stroustrup", "is_correct": false}},
-                {{"text": "Dennis Ritchie", "is_correct": false}}
-                ]
+                {{"id":"a",text": "Guido van Rossum"}},
+                {{"id":"b",text": "James Gosling"}},
+                {{"id":"c","text": "Bjarne Stroustrup"}},
+                {{"id":"d","text": "Dennis Ritchie"}}
+                ],
+                "is_correct": "a"
             }}}}
             """
         ))
@@ -389,7 +391,7 @@ def generate_assessment():
             
             score_id = score.id
             for i in model_output:
-                question=Question(score_id=score_id,quest_text=i["question_text"],choices=i["choices"])
+                question=Question(score_id=score_id,quest_text=i["question_text"],choices=i["choices"],is_correct=i["is_correct"])
                 db.session.add(question)
             db.session.commit()
         except SQLAlchemyError as e:
@@ -402,6 +404,7 @@ def generate_assessment():
     except Exception as e:
                 return Response(f"Google AI Error: {str(e)}", status=500, mimetype="text/plain")
     
+
 @routes.route("/start",methods=["POST"])
 def start():
     data=request.json
@@ -409,19 +412,34 @@ def start():
     id=data.get("score_id")
 
     #storing result
-    result=[]
     score=Score.query.filter_by(user_id=user_id,id=id).first()
     if score is None:
         return jsonify({"error": "Assessment not found"}), 404
-    result.append({"id":id,"subject":score.subject,"title":score.topic})
+    result={"id":id,"subject":score.subject,"title":score.topic,"questions":[]}
     question=Question.query.filter_by(score_id=id)
     for q in question:
-        choices=[{"option":c["text"]} for c in q.choices]
-        result.append({"question":q.quest_text,"choices":choices})
+        options = []
+        for c in q.choices:
+            options.append({"id":c["id"],"option":c["text"]})
+        question_data = {
+            "id":q.id,
+            "text": q.quest_text,
+            "options": options
+        }
+        result["questions"].append(question_data)
     print(result)
-    
-    
     return jsonify(result)
+    
+#for pending requests
+@routes.route("/pending",methods=["POST"])
+def pending():
+    data=request.json
+    user_id=data["user_id"]
+    #status=data["status"]
+    user=User.query.filter_by(id=user_id).first()
+    res=Score.query.filter_by(user_id=user_id).all()
+    response={"user_name":user.username,"assessments":[{"id":r.id,"subject":r.subject,"topic":r.topic,"status":r.status.value,"created_at":r.time,"due_date":r.due_date} for r in res]}
+    return jsonify(response)
 
 # deleting the account
 @routes.route("/delete",methods=["POST"])
@@ -429,13 +447,28 @@ def delete():
     details=request.json
     user_id=details["user_id"]
     user=User.query.filter_by(id=user_id).first()
-    try:
-        if  user:
-            db.session.delete(user)
-            db.session.commit()
-    except Exception as e:
-        return jsonify({"message":"Something went wrong!!! Try again"}),400
-    return jsonify(),200
+    if  user:
+        db.session.delete(user)
+        db.session.commit()
+    return("successful")
+
+#submitted answers
+@routes.route("/submitting",methods=["POST"])
+#@cross_origin(origin='http://localhost:8080')
+def submitting():
+    data=request.json
+    user_id=data["user_id"]
+    score_id=data["score_id"]
+    questions=data["answers"]
+    score=Score.query.filter_by(user_id=user_id,id=score_id).first()
+    print(type(questions))
+    for qid_str , choice in questions.items():
+        qid=int(qid_str)
+        rec=Question.query.get(qid)
+        rec.user_choice=choice
+    score.status="completed"
+    db.session.commit()
+    return jsonify({"message":"choices added successfully"})
 
 # code generator
 @routes.route("/code_generator",methods=["POST"])

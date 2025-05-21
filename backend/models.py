@@ -4,13 +4,15 @@ import enum
 from sqlalchemy.dialects.mysql import JSON
 from sqlalchemy import Enum
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
+import pytz
+
+
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 
-
-
+#for timezone
+tz=pytz.timezone('Asia/Kolkata')
 #for status 
 class Status(enum.Enum):
     pending = "pending"
@@ -47,7 +49,7 @@ class Score(db.Model):
     subject=db.Column(db.String(100),nullable=False)
     topic=db.Column(db.String(100),nullable=False)
     status=db.Column(Enum(Status),default=Status.pending,nullable=False)
-    time = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(ZoneInfo("Asia/Kolkata")))
+    time = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(tz))
     due_date = db.Column(db.DateTime,nullable=False)
     answer=db.relationship("Question",backref="score",cascade="all, delete-orphan")
     score=db.Column(db.Integer,nullable=True)
@@ -55,7 +57,7 @@ class Score(db.Model):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if not self.due_date:
-            base_time = self.time or datetime.now(ZoneInfo("Asia/Kolkata"))
+            base_time = self.time or datetime.now(tz)
             self.due_date = base_time + timedelta(days=3)
 #question modwl
 class Question(db.Model):
@@ -64,5 +66,5 @@ class Question(db.Model):
     quest_text=db.Column(db.Text,nullable=False)
     choices = db.Column(JSON, nullable=False)
     user_choice=db.Column(db.String(100),nullable=True)
-    is_correct=db.Column(db.Boolean,default=False,nullable=True)
-    time = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(ZoneInfo("Asia/Kolkata")))
+    is_correct=db.Column(db.String(1),nullable=False)
+    time = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(tz))

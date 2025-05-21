@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,6 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { X, Eye, EyeOff } from "lucide-react";
-import axios from 'axios';
 
 export default function ForgotPassword() {
   const [step, setStep] = useState<"email" | "otp" | "reset">("email");
@@ -26,8 +26,16 @@ export default function ForgotPassword() {
 
   const navigate = useNavigate();
 
-  const handleSendOtp = async () => {
-    // verify  the email pattern
+  const handleSendOtp = () => {
+    if (!emailForReset) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!emailPattern.test(emailForReset)) {
       toast({
@@ -37,6 +45,12 @@ export default function ForgotPassword() {
       });
       return;
     }
+
+    toast({
+      title: "OTP Sent",
+      description: `An OTP has been sent to ${emailForReset}`,
+    });
+    setStep("otp");
 
     // Start the resend timer
     setResendTimer(30);
@@ -50,71 +64,35 @@ export default function ForgotPassword() {
         setCanResend(true);
       }
     }, 1000);
-    const data={
-      emailForReset
-    }
-    try{
-    const res=await axios.post('http://127.0.0.1:5000/send-otp',data)
-    // on successful verfication
-    toast({
-      title: "OTP Sent",
-      description: `An OTP has been sent to ${emailForReset}`,
-    });
-    setStep("otp");
-    }
-    catch(error){
-      toast({
-        title:"Error",
-        description: error.response?.data?.message || "Something went wrong.",
-      })
-    }
   };
 
-const handleVerifyOtp = async () => {
-  if (!otp) {
-    toast({
-      title: "Error",
-      description: "Please enter the OTP.",
-      variant: "destructive",
-    });
-    return;
-  }
+  const handleVerifyOtp = () => {
+    if (!otp) {
+      toast({
+        title: "Error",
+        description: "Please enter the OTP.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  if (otp.length !== 6 || isNaN(Number(otp))) {
-    toast({
-      title: "Error",
-      description: "OTP must be a 6-digit number.",
-      variant: "destructive",
-    });
-    return;
-  }
+    if (otp.length !== 6 || isNaN(Number(otp))) {
+      toast({
+        title: "Error",
+        description: "OTP must be a 6-digit number.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  const data = { emailForReset, otp };
-  // request to verify otp
-  try {
-    const res = await axios.post('http://127.0.0.1:5000/verify-otp', data);
-
-    // Only on successful verification
     toast({
       title: "Success",
-      description: res.data.message,
+      description: "OTP verified successfully!",
     });
     setStep("reset");
+  };
 
-  } catch (error) {
-   
-    // Extract message from backend if available
-    const message = error?.response?.data?.message || "Something went wrong.";
-    toast({
-      title: "Error",
-      description: message,
-      variant: "destructive",
-    });
-  }
-};
-
-
-  const handleResetPassword = async () => {
+  const handleResetPassword = () => {
     if (!newPassword || !confirmPassword) {
       toast({
         title: "Error",
@@ -131,34 +109,17 @@ const handleVerifyOtp = async () => {
       });
       return;
     }
-    const actions="reset_password"
-    const data={
-      actions,emailForReset,newPassword,confirmPassword
-    }
-    // request to reset password
-    try{
-      const res=await axios.post(
-        'http://127.0.0.1:5000/reset-password',
-        data
-      );
 
     toast({
       title: "Password Reset Success",
-      description: res.data.message,
+      description: "Your password has been successfully reset.",
     });
+
     setIsDialogOpen(false);
     setTimeout(() => {
       navigate("/login");
-    }, 1000);  
-  }
-  catch(error)
-{
-      toast({
-      title: "Error",
-      description: error.response?.data?.message || "Something went wrong.",
-    });
-
-}};
+    }, 1000);
+  };
 
   const handleDialogClose = () => {
     if (step === "reset") {
