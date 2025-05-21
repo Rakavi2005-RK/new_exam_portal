@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Code, Lightbulb } from "lucide-react";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { toast } from "sonner";
+import axios from 'axios';
+
 
 const CodeGenerator: React.FC = () => {
   const [query, setQuery] = useState("");
@@ -20,7 +22,7 @@ const CodeGenerator: React.FC = () => {
     "JavaScript", "TypeScript", "Python", "Java", "C++", "Go", "Ruby", "PHP", "C#", "Swift"
   ];
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!query.trim()) {
       toast.error("Please enter a problem statement");
       return;
@@ -33,99 +35,26 @@ const CodeGenerator: React.FC = () => {
 
     setIsGenerating(true);
 
-    // Simulate API call with setTimeout
-    setTimeout(() => {
-      // Example generated content
-      const codeExample = language === "JavaScript" 
-        ? `function sortArray(arr) {
-  // Quick sort implementation
-  if (arr.length <= 1) {
-    return arr;
-  }
-  
-  const pivot = arr[Math.floor(arr.length / 2)];
-  const left = [];
-  const right = [];
-  const equal = [];
-  
-  for (let val of arr) {
-    if (val < pivot) {
-      left.push(val);
-    } else if (val > pivot) {
-      right.push(val);
-    } else {
-      equal.push(val);
-    }
-  }
-  
-  return [
-    ...sortArray(left),
-    ...equal,
-    ...sortArray(right)
-  ];
-}
+    try{
+      const res=await axios.post(
+        ' http://127.0.0.1:5000/code_generator',
+         {query,language},
+         {
+        headers:{"content-type":"application/json",}
+         },
+       
+      )
 
-// Example usage
-const unsortedArray = [5, 3, 7, 1, 8, 2, 9, 4, 6];
-const sortedArray = sortArray(unsortedArray);
-console.log(sortedArray); // [1, 2, 3, 4, 5, 6, 7, 8, 9]`
-        : language === "Python" 
-        ? `def sort_array(arr):
-    # Quick sort implementation
-    if len(arr) <= 1:
-        return arr
-    
-    pivot = arr[len(arr) // 2]
-    left = []
-    right = []
-    equal = []
-    
-    for val in arr:
-        if val < pivot:
-            left.append(val)
-        elif val > pivot:
-            right.append(val)
-        else:
-            equal.append(val)
-    
-    return sort_array(left) + equal + sort_array(right)
-
-# Example usage
-unsorted_array = [5, 3, 7, 1, 8, 2, 9, 4, 6]
-sorted_array = sort_array(unsorted_array)
-print(sorted_array)  # [1, 2, 3, 4, 5, 6, 7, 8, 9]`
-        : `// Example code would be generated for ${language}`;
-
-      const explanationText = `## Quick Sort Algorithm Explanation
-
-This implementation uses the **quick sort** algorithm, which is a divide-and-conquer sorting method.
-
-### How It Works:
-1. **Base Case**: If the array has 0 or 1 elements, it's already sorted.
-2. **Pivot Selection**: Choose a pivot element (using the middle element in this implementation).
-3. **Partitioning**: 
-   - Create three arrays: left (elements < pivot), equal (elements = pivot), and right (elements > pivot).
-   - Iterate through the array, placing each element in the appropriate partition.
-4. **Recursion**: Sort the left and right partitions using the same method.
-5. **Combine**: Join the sorted left partition, equal elements, and sorted right partition.
-
-### Time Complexity:
-- **Average Case**: O(n log n)
-- **Worst Case**: O(n²) - occurs when the pivot is always the smallest or largest element
-- **Best Case**: O(n log n)
-
-### Space Complexity:
-- O(n) for the auxiliary arrays and recursion stack
-
-### Sample Output:
-Input: [5, 3, 7, 1, 8, 2, 9, 4, 6]
-Output: [1, 2, 3, 4, 5, 6, 7, 8, 9]`;
-
-      setGeneratedCode(codeExample);
-      setExplanation(explanationText);
+      setGeneratedCode(res.data.code);
+      setExplanation(res.data.explanation);
       setIsGenerating(false);
       toast.success("Code generated successfully!");
-    }, 1500);
+    }
+    catch(error)
+    {
+        toast.error(error.response?.data?.message || "Something went wrong");
+    }
+   
   };
 
   return (
