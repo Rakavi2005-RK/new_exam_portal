@@ -58,7 +58,7 @@ const Index: React.FC = () => {
   }, []);
   
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen  flex flex-col">
       {/* Hero Section */}
       <section className="relative min-h-[90vh] flex items-center pb-20 pt-10 overflow-hidden">
         <div className="absolute inset-0 z-0">
@@ -302,7 +302,7 @@ const Index: React.FC = () => {
       
       {/* Footer */}
       <footer className="py-12 bg-muted/30 border-t">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-4">
               <Logo />

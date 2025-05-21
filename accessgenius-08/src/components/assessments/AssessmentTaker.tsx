@@ -110,6 +110,10 @@ const AssessmentTaker: React.FC<AssessmentTakerProps> = ({
       toast.success("Assessment submitted successfully!", {
         description: `Your score: ${score}%`
       });
+      navigate("/score", {
+        state: {score,answers,questions
+        }
+      });
       onComplete(answers, score);
     }, 1500);
   };
