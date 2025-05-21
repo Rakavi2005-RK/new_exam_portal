@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 /*
+=======
+
+>>>>>>> 12265da7a285c71eabc0a492e3501fcf6d1c715d
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AssessmentTaker from "@/components/assessments/AssessmentTaker";
@@ -10,6 +14,7 @@ import axios from "axios"
 
 const TakeAssessment: React.FC = () => {
   const navigate = useNavigate();
+<<<<<<< HEAD
   //const { id } = useParams();
   const [questions, setQuestions] = useState([]);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -30,10 +35,32 @@ const TakeAssessment: React.FC = () => {
       console.error("Failed to load questions:", error);
     });
 }, [user_id, score_id]);
+=======
+  const { id } = useParams();
+  const [questions, setQuestions] = useState([]);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const location = useLocation();
+  const { user_id, score_id } = location.state || {};
+  useEffect(() => {
+  axios
+    .post("http://localhost:5000/start", {
+      user_id: user_id,        
+      score_id: score_id, 
+    })
+    .then((res) => {
+      setQuestions(res.data);
+      console.log(questions)
+    })
+    .catch((err) => {
+      console.error("Failed to load questions:", err);
+    });
+}, [user_id,score_id]);
+>>>>>>> 12265da7a285c71eabc0a492e3501fcf6d1c715d
 
   
   // Mock assessment data - in a real app this would be fetched from an API
   
+<<<<<<< HEAD
   const assessmentData = {
     assessmentId: questions['id'] ,
     title: questions['title'],
@@ -41,6 +68,9 @@ const TakeAssessment: React.FC = () => {
     timeLimit: 60, // in minutes
     questions: questions['questions']
   };
+=======
+  const assessmentData = questions;
+>>>>>>> 12265da7a285c71eabc0a492e3501fcf6d1c715d
 
   const handleComplete = (answers: Record<number, string>, score: number) => {
     setIsCompleted(true);
@@ -107,6 +137,7 @@ const TakeAssessment: React.FC = () => {
   );
 };
 
+<<<<<<< HEAD
 export default TakeAssessment;*/
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -235,4 +266,6 @@ if (!assessmentData) {
   );
 };
 
+=======
+>>>>>>> 12265da7a285c71eabc0a492e3501fcf6d1c715d
 export default TakeAssessment;

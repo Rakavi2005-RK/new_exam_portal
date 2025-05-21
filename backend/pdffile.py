@@ -247,6 +247,7 @@ def pdf_file():
 
     except Exception as e:
         print(f"Error: {e}") 
+<<<<<<< HEAD
         return Response(f"Error {str(e)}",status=500 ,mimetype="text/plain") 
 
         # take-assessment 
@@ -393,3 +394,6 @@ const TakeAssessment: React.FC = () => {
 
 export default TakeAssessment;
 """
+=======
+        return Response(f"Error {str(e)}",status=500 ,mimetype="text/plain") 
+>>>>>>> 12265da7a285c71eabc0a492e3501fcf6d1c715d
