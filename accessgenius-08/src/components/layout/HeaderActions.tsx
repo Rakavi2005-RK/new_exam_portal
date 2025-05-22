@@ -18,7 +18,7 @@ export const HeaderActions: React.FC<HeaderActionsProps> = ({
   isAuthenticated,
 }) => {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 justify-between">
       <Button 
         variant="ghost" 
         size="icon" 
