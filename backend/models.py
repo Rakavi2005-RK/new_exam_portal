@@ -17,7 +17,8 @@ tz=pytz.timezone('Asia/Kolkata')
 class Status(enum.Enum):
     pending = "pending"
     Completed = "completed"
-# sign_up model
+    expired="expired"
+#sign_up model
 class User(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
@@ -30,8 +31,10 @@ class User(db.Model):
 
     def check_password(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)
+    # foreign keys for feedback and score
     feedback=db.relationship("feedback",backref="User",cascade="all, delete-orphan")
     Score=db.relationship("Score",backref="User",cascade="all, delete-orphan")
+    
     
 # feedback model
 class feedback(db.Model):
@@ -58,8 +61,9 @@ class Score(db.Model):
         super().__init__(**kwargs)
         if not self.due_date:
             base_time = self.time or datetime.now(tz)
+            # assessments expired after 3 days
             self.due_date = base_time + timedelta(days=3)
-#question modwl
+#question model
 class Question(db.Model):
     id=db.Column(db.Integer,primary_key=True,nullable=False)
     score_id=db.Column(db.ForeignKey(Score.id),nullable=False)
@@ -68,3 +72,14 @@ class Question(db.Model):
     user_choice=db.Column(db.String(100),nullable=True)
     is_correct=db.Column(db.String(1),nullable=False)
     time = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(tz))
+
+    # Method to check if the question is expired and delete expired questions from question table
+    @staticmethod
+    def delete_expired(r):
+        Question.query.filter_by(score_id=r.id).delete(synchronize_session=False)
+        # Update the status of the score table to expired
+        Score.query.filter_by(id=r.id).update({Score.status:Status.expired})
+        return db.session.commit()
+        
+
+

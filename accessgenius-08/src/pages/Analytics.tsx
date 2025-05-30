@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState,useEffect } from 'react';
 import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,8 +7,10 @@ import { AlertTriangle, Users, Book, Award } from 'lucide-react';
 import ProgressChart, { DualChart } from '@/components/dashboard/ProgressChart';
 import MainLayout from '@/components/layout/MainLayout';
 import ActivityList from '@/components/dashboard/ActivityList';
+import axios from 'axios';
 
 // Sample data for charts
+
 const performanceData = [
   { name: 'Jan', highest: 85, average: 75, lowest: 65 },
   { name: 'Feb', highest: 88, average: 78, lowest: 67 },
@@ -36,37 +38,39 @@ const completionData = [
   { name: 'Jun', assigned: 28, completed: 25 },
 ];
 
-const recentActivities = [
-  {
-    id: '1',
-    title: 'Math Assessment Completed',
-    time: '2 hours ago',
-    user: { name: 'John Doe', avatar: undefined, initials: 'JD' },
-    status: 'completed' as const,
-    type: 'assessment' as const,
-    description: 'Scored 92% on Advanced Algebra assessment',
-  },
-  {
-    id: '2',
-    title: 'Science Quiz Assigned',
-    time: '4 hours ago',
-    user: { name: 'Jane Smith', avatar: undefined, initials: 'JS' },
-    status: 'pending' as const,
-    type: 'assessment' as const,
-    description: 'Physics Concepts Quiz due in 3 days',
-  },
-  {
-    id: '3',
-    title: 'Low Engagement Warning',
-    time: '1 day ago',
-    user: { name: 'System', avatar: undefined, initials: 'SY' },
-    status: 'warning' as const,
-    type: 'alert' as const,
-    description: '5 students have not logged in for over a week',
-  },
-];
+
 
 const Analytics = () => {
+
+ const [recentActivities, setrecentActivities] = useState<any[]>([]);
+const [totalAssessments, setTotalAssessments] = useState<any[]>([]);
+useEffect(() => {
+  
+  const fetchRecentActivities = async () => {
+    try {
+      const user_id = localStorage.getItem("user_id");
+      const res=await axios.post('http://127.0.0.1:5000/recent_activity',{user_id})
+      setrecentActivities(res.data);
+    } 
+    catch (error) {
+      console.error('Error fetching recent activities:', error);
+    }
+  };
+   
+  const total_assessments= async () => {
+    try {
+      const user_id = localStorage.getItem("user_id");
+      const res=await axios.post('http://127.0.0.1:5000/total_assessment',{user_id})
+      setTotalAssessments(res.data);
+    }
+    catch (error) {
+      console.error('Error fetching total assessments:', error);
+    }}
+    fetchRecentActivities();
+    total_assessments();
+},[]);
+
+
   return (
     <MainLayout>
       <div className="flex flex-col gap-6 p-6">
@@ -84,14 +88,14 @@ const Analytics = () => {
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <div className="text-2xl font-bold">248</div>
+                <div className="text-2xl font-bold">{totalAssessments?.total_assessment?? "Loading..."}</div>
                 <Book className="h-8 w-8 text-muted-foreground/70" />
               </div>
-              <p className="text-xs text-muted-foreground">+12% from last month</p>
+              <p className="text-xs text-muted-foreground">{totalAssessments?.percentage ?? "0%"} from last month</p>
             </CardContent>
           </Card>
           
-          <Card>
+     { /*    <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Active Students</CardTitle>
             </CardHeader>
@@ -102,7 +106,7 @@ const Analytics = () => {
               </div>
               <p className="text-xs text-muted-foreground">+5% from last month</p>
             </CardContent>
-          </Card>
+          </Card> */}
           
           <Card>
             <CardHeader className="pb-2">
@@ -110,10 +114,10 @@ const Analytics = () => {
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <div className="text-2xl font-bold">78%</div>
+                <div className="text-2xl font-bold">{totalAssessments?.average?? "0%"}</div>
                 <Award className="h-8 w-8 text-muted-foreground/70" />
               </div>
-              <p className="text-xs text-muted-foreground">+3% from last month</p>
+              <p className="text-xs text-muted-foreground">{totalAssessments?.approxi_average?? 0} from last month</p>
             </CardContent>
           </Card>
         </div>
