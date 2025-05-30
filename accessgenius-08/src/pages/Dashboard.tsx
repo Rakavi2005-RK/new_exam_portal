@@ -37,7 +37,7 @@ const status = "pending";
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("pending");
   const [assessments, setAssessments] = useState([]);
-  const [currentUser, setCurrentUser] = useState({ name: "" }); // ✅ store name from backend
+  const [currentUser, setCurrentUser] = useState({ name: "" }); 
   const navigate = useNavigate();
 
   const request = { user_id };
@@ -51,17 +51,17 @@ const Dashboard: React.FC = () => {
         setAssessments(response.data.assessments); 
         console.log(response.data.assessments)
         setCurrentUser({ name: response.data.user_name });
-        console.log("chi") 
+    
         
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
-  }, [activeTab]);
+  }, []);
 
-  {/*const filteredAssessments = assessments.filter(
+  const filteredAssessments = assessments.filter(
     (assessment) => assessment.status === activeTab
-  );*/}
+  );
 
 
   return (
@@ -101,11 +101,15 @@ const Dashboard: React.FC = () => {
                         <TableHead>Created</TableHead>
                         <TableHead>Due Date</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Action</TableHead>
+                        {activeTab==='pending'?(
+                        <TableHead>Action</TableHead>):(<TableHead>Score</TableHead>)
+                        } 
+                        {activeTab==="completed"?
+                        (<TableHead>preview</TableHead>):null}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {assessments.map((assessment) => ( 
+                      {filteredAssessments.map((assessment) => ( 
                         <TableRow key={assessment.id}>
                           <TableCell className="font-medium">
                             <div className="flex items-center">
@@ -131,13 +135,25 @@ const Dashboard: React.FC = () => {
                                 assessment.status.slice(1)}
                             </Badge>
                           </TableCell>
-                          <TableCell>
+                          <TableCell >
+                            {activeTab=='pending'?(
                            <Link to={{pathname: `/take-assessment/${assessment.id}`,}}
                               state={{ score_id: assessment.id }}>
                               <Button variant="default" size="sm">
                                 Start <ChevronRight className="ml-1 h-4 w-4" />
                               </Button>
-                            </Link>
+                            </Link>):(<TableCell >{assessment.score ?? 0}</TableCell>)}
+                            
+                          </TableCell>
+                          <TableCell >
+                            {activeTab=='completed'?(
+                           <Link to={{pathname: `/preview-assessment/${assessment.id}`,}}
+                              state={{ score_id: assessment.id }}>
+                              <Button variant="default" size="sm">
+                                preview <ChevronRight className="ml-1 h-4 w-4" />
+                              </Button>
+                            </Link>):null}
+                            
                           </TableCell>
                         </TableRow>
                       ))}
