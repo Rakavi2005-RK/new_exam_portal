@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Clock, AlertTriangle, ArrowLeft, ArrowRight, Flag, Send } from "lucide-react";
 import { toast } from "sonner";
+import { useBreakpoint } from '@/hooks/use-mobile';
 
 interface Question {
   id: number;
@@ -38,6 +39,7 @@ const AssessmentTaker: React.FC<AssessmentTakerProps> = ({
   const [flaggedQuestions, setFlaggedQuestions] = useState<Set<number>>(new Set());
   const [remainingTime, setRemainingTime] = useState(timeLimit * 60);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const {isMobile,isTablet} = useBreakpoint();
 
   const navigate = useNavigate();
 
@@ -163,10 +165,10 @@ const AssessmentTaker: React.FC<AssessmentTakerProps> = ({
               className="space-y-3"
             >
               {currentQuestion.options.map(option => (
-                <div key={option.id} className="flex items-center space-x-2 p-3 rounded-md border hover:bg-muted transition-colors">
-                  <RadioGroupItem value={option.id} id={option.id} />
-                  <Label htmlFor={option.id} className="flex-grow cursor-pointer">{option.text}</Label>
-                </div>
+                <label key={option.id} htmlFor={option.id} className={`flex items-center space-x-3 border p-4 rounded-md  hover:bg-muted transition-colors cursor pointer ${isMobile ? "text-base":"text-sm"}`}>
+                  <RadioGroupItem value={option.id} id={option.id} className="shrink-0" />
+                  <span className="flex-grow">{option.text}</span>
+                </label>
               ))}
             </RadioGroup>
           </div>

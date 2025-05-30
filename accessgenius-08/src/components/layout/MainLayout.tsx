@@ -89,9 +89,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       </header>
 
       {/* Main content */}
-      <div className="flex-1 flex overflow-y-auto">
+      <div className="flex-1 flex">
         {isAuthenticated && !isMobile && (
-          <aside className="w-64 border-r bg-sidebar px-4 py-6 hidden md:block ">
+          <aside className="w-64 fixed top-16 bottom-0 left-0 border-r bg-sidebar px-4 py-6 hidden md:block overflow-y-auto">
             <Navigation 
               items={filteredMainNavItems} 
               bottomItems={filteredBottomNavItems} 
@@ -100,7 +100,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         )}
 
         <main className={cn(
-          "flex-1 py-6 px-6 ", 
+          "flex-1 ml-0 md:ml-64 overflow-y-auto h-[calc(100vh-4rem)] py-6 px-6", 
           pageTransition ? "page-transition-enter page-transition-enter-active" : ""
         )}>
           {children}

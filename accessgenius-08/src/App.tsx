@@ -21,6 +21,7 @@ import CodeGenerator from './pages/CodeGenerator';
 import Feedback from './pages/Feedback';
 import ScorePage from './pages/ScorePage';
 
+
 const App: React.FC = () => {
   return (
     <Router>

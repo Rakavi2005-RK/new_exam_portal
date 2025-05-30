@@ -9,7 +9,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { FileText, ChevronRight } from "lucide-react";
-// Update the import path to match your hook file location:
 import { useBreakpoint } from "@/hooks/use-mobile";
 
 const Dashboard: React.FC = () => {
@@ -66,7 +65,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <MainLayout>
-      <div className="py-6 space-y-8 animate-fade-in">
+      <div className="py-6 space-y-8 animate-fade-in overflow-x-hidden">
         <DashboardHeader
           title={`Welcome, ${currentUser.name}`}
           description="Track your assessment progress and upcoming deadlines"
