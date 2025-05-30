@@ -88,7 +88,7 @@ const Dashboard: React.FC = () => {
                 <TabsTrigger value="completed">Completed</TabsTrigger>
               </TabsList>
               <TabsContent value={activeTab} className="space-y-4">
-                {assessments.length === 0 ? (
+                {filteredAssessments.length === 0 ? (
                   <div className="p-8 text-center text-muted-foreground">
                     No {activeTab} assessments found.
                   </div>

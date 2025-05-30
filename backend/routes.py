@@ -386,7 +386,7 @@ def generate_assessment():
         if not model_output or not isinstance(model_output,list) :
                 return Response("AI model did not generate any valid list of content", status=500, mimetype="text/plain")
         try:
-            score=Score(subject=subject,topic=topic,user_id=user_id)
+            score=Score(subject=subject,topic=topic,difficulty=difficulty,user_id=user_id)
             db.session.add(score)
             db.session.flush() 
             # Get the score ID after flushing
@@ -475,8 +475,6 @@ def submitting():
         qid=int(qid_str)
         rec=Question.query.get(qid)
         rec.user_choice=choice
-    score.status="completed"
-    return jsonify({"message":"choices added successfully"})
     sc_cal=Question.query.filter_by(score_id=score_id).all()
     count=0
     for i in sc_cal:
@@ -535,7 +533,7 @@ def recent_activity():
     try:
         data = request.json
         user_id = data["user_id"]
-        threshold = datetime.now(tz) - timedelta(days=30)
+        threshold = datetime.now(tz) - timedelta(days=7)
         #sort by time descending
         user = (
             Score.query
@@ -552,7 +550,7 @@ def recent_activity():
                 settime = f"{delta.total_seconds()/3600:.1f} hours ago"
             else:
                 settime = f"{u.time.strftime('%Y-%m-%d')} at {u.time.strftime('%H:%M')}"
-            if u.status == Status.Completed:
+            if u.status == Status.completed:
                 response.append({
                     "id": u.id,
                     "title": f"{u.subject} Assessment completed ",
@@ -699,26 +697,26 @@ def analysis():
         topic_stat=(
             db.session.query(
                 Score.topic,
-                extract('day' ,Score.time).label('day'),
-                extract('month' ,Score.time).label('month'),
-                Score.score
+                Score.time,
+                Score.score,
+                Score.difficulty
             ).filter(
                 Score.user_id == user_id,
                 Score.time >= year_start,
                 Score.time <= year_end
             ).order_by(
                 Score.topic, 
-                'day','month'
+                Score.time
             )
         )
-        topic_scores = [{'topic': topic, 'day': day, 'month': month_abbr[month], 'score': score if score is not None else 0} for topic, day, month, score in topic_stat]
+        topic_scores = [{'topic': topic, 'date':time.strftime("%Y-%m-%d"),'score': score if score is not None else 0,"difficulty":difficulty.value} for topic,time,score,difficulty in topic_stat]
                 
         return jsonify(average_scores,subject_scores,topic_scores), 200
        
             
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
-
+# Preview of the assessment
 @routes.route("/preview",methods=["POST"])
 def preview():
     data=request.json
@@ -743,9 +741,27 @@ def preview():
             "user_choice":q.user_choice
         }
         result["questions"].append(question_data)
-    print(result)
+    
     return jsonify(result)
 
+ # Update the status of the score
+@routes.route("/update_exam_status", methods=["POST"])
+def update_exam_status():
+    data = request.json
+    user_id = data.get("user_id")
+    score_id = data.get("score_id")
+    status = data.get("status")
+
+    if not user_id or not score_id or not status:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    score = Score.query.filter_by(user_id=user_id, id=score_id).first()
+    if not score:
+        return jsonify({"error": "Score not found"}), 404
+
+    score.status = Status[status]
+
+# profile 
 @routes.route("/profile",methods=["POST"])
 def profile():
     data=request.json

@@ -16,8 +16,15 @@ tz=pytz.timezone('Asia/Kolkata')
 #for status 
 class Status(enum.Enum):
     pending = "pending"
-    Completed = "completed"
+    completed = "completed"
     expired="expired"
+    exit="exit"
+# for difficulty
+class Difficulty(enum.Enum):
+    easy = "easy"
+    medium = "medium"
+    hard = "hard"
+    expert="expert"
 #sign_up model
 class User(db.Model):
     
@@ -52,6 +59,7 @@ class Score(db.Model):
     subject=db.Column(db.String(100),nullable=False)
     topic=db.Column(db.String(100),nullable=False)
     status=db.Column(Enum(Status),default=Status.pending,nullable=False)
+    difficulty=db.Column(Enum(Difficulty),nullable=False)
     time = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(tz))
     due_date = db.Column(db.DateTime,nullable=False)
     answer=db.relationship("Question",backref="score",cascade="all, delete-orphan")
