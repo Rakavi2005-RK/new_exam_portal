@@ -427,6 +427,8 @@ def start():
             "options": options
         }
         result["questions"].append(question_data)
+    score.status="completed"
+    db.session.commit()
     print(result)
     return jsonify(result)
     
@@ -438,7 +440,7 @@ def pending():
     #status=data["status"]
     user=User.query.filter_by(id=user_id).first()
     res=Score.query.filter_by(user_id=user_id).all()
-    response={"user_name":user.username,"assessments":[{"id":r.id,"subject":r.subject,"topic":r.topic,"status":r.status.value,"created_at":r.time,"due_date":r.due_date} for r in res]}
+    response={"user_name":user.username,"assessments":[{"id":r.id,"subject":r.subject,"topic":r.topic,"status":r.status.value,"created_at":r.time,"due_date":r.due_date,"score":r.score} for r in res]}
     return jsonify(response)
 
 # deleting the account
@@ -460,15 +462,21 @@ def submitting():
     user_id=data["user_id"]
     score_id=data["score_id"]
     questions=data["answers"]
-    score=Score.query.filter_by(user_id=user_id,id=score_id).first()
     print(type(questions))
     for qid_str , choice in questions.items():
         qid=int(qid_str)
         rec=Question.query.get(qid)
         rec.user_choice=choice
-    score.status="completed"
+    sc_cal=Question.query.filter_by(score_id=score_id).all()
+    count=0
+    for i in sc_cal:
+        if(i.user_choice==i.is_correct):
+            count+=1
+    score=Score.query.filter_by(user_id=user_id,id=score_id).first()
+    if(score):
+        score.score=count
     db.session.commit()
-    return jsonify({"message":"choices added successfully"})
+    return jsonify({"message":"choices added successfully","score":count})
 
 # code generator
 @routes.route("/code_generator",methods=["POST"])
@@ -507,6 +515,40 @@ def code_generator():
     except Exception as e:
         return jsonify({"message":"{e},something went wrong"}),400
     return jsonify({"code":code_json["code"],"explanation":code_json["explanation"]}),200
+
+@routes.route("/preview",methods=["POST"])
+def preview():
+    data=request.json
+    user_id=data.get("user_id")
+    id=data.get("score_id")
+
+    #storing result
+    score=Score.query.filter_by(user_id=user_id,id=id).first()
+    if score is None:
+        return jsonify({"error": "Assessment not found"}), 404
+    result={"id":id,"subject":score.subject,"title":score.topic,"questions":[]}
+    question=Question.query.filter_by(score_id=id)
+    for q in question:
+        options = []
+        for c in q.choices:
+            options.append({"id":c["id"],"option":c["text"]})
+        question_data = {
+            "id":q.id,
+            "text": q.quest_text,
+            "options": options,
+            "correct_option":q.is_correct,
+            "user_choice":q.user_choice
+        }
+        result["questions"].append(question_data)
+    print(result)
+    return jsonify(result)
+
+@routes.route("/profile",methods=["POST"])
+def profile():
+    data=request.json
+    user_id=data.get("user_id")
+    user=User.query.filter_by(id=user_id).first()
+    return jsonify({"user":{"email":user.email,"name":user.username}}),200
     
 
 

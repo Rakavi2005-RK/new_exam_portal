@@ -106,8 +106,7 @@ const TakeAssessment: React.FC = () => {
     />
   );
 };
-
-export default TakeAssessment;*/
+export default TakeAssessment;*/ 
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AssessmentTaker from "@/components/assessments/AssessmentTaker";
@@ -132,23 +131,50 @@ const TakeAssessment: React.FC = () => {
        score_id:score_id
     }
    const [assessmentData, setAssessmentdata] = useState<AssessmentTakerProps | null>(null);
-    useEffect( () => {
- axios.post("http://localhost:5000/start",data,{headers: { "Content-Type": "application/json" }})
+   const [refreshed, setrefreshed] = useState(false);
+  useEffect(() => {
+  const alreadyLoaded = localStorage.getItem("exam_loaded");
+  const examOver = localStorage.getItem("exam_over");
+
+  if (examOver === "true") {
+    setrefreshed(true);
+    return;
+  }
+
+  const loadAssessment = () => {
+    axios.post("http://localhost:5000/start", data, {
+      headers: { "Content-Type": "application/json" },
+    })
     .then((response) => {
-      console.log(response.data)
-       setAssessmentdata ({
-    assessmentId:score_id,
-    title: response.data.title,
-    subject: response.data.subject,
-    timeLimit: 5, // in minutes
-    questions:response.data.questions,
-    onComplete:null
-  });
+      console.log(response.data);
+      setAssessmentdata({
+        assessmentId: score_id,
+        title: response.data.title,
+        subject: response.data.subject,
+        timeLimit: 5,
+        questions: response.data.questions,
+        onComplete: null,
+      });
     })
     .catch((error) => {
       console.error("Failed to load questions:", error);
     });
+  };
+
+  if (alreadyLoaded) {
+    localStorage.setItem("exam_over", "true");
+    setrefreshed(true);
+  } else {
+    localStorage.setItem("exam_loaded", "1");
+    loadAssessment();   // Load the assessment on first load.
+  }
+
+  return () => {
+    localStorage.removeItem("exam_loaded");
+    localStorage.removeItem("exam_over");
+  };
 }, []);
+
 
   
   // Mock assessment data - in a real app this would be fetched from an API
@@ -215,6 +241,12 @@ const TakeAssessment: React.FC = () => {
     );
     
   }
+if(refreshed){
+  return(
+  <div>
+      {refreshed ? (<h2> You refresed, your assessment is over</h2>):(<h2>welcome</h2>)}
+  </div>);
+}
 if (!assessmentData) {
   return (
     <div className="container max-w-4xl mx-auto py-10 px-4 text-center">
@@ -222,7 +254,9 @@ if (!assessmentData) {
     </div>
   );
 }
+
   return (
+    
     <AssessmentTaker 
       assessmentId={assessmentData.assessmentId}
       title={assessmentData.title}
@@ -232,6 +266,7 @@ if (!assessmentData) {
       onComplete={handleComplete}
       onCancel={handleCancel}
     />
+    
   );
 };
 
