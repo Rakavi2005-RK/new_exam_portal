@@ -19,7 +19,10 @@ import StudentAssessment from './pages/StudentAssessment';
 import Groups from './pages/Groups';
 import CodeGenerator from './pages/CodeGenerator';
 import Feedback from './pages/Feedback';
+
 import ScorePage from './pages/ScorePage';
+
+import Preview from './pages/Preview';
 
 
 const App: React.FC = () => {
@@ -37,6 +40,7 @@ const App: React.FC = () => {
         <Route path="/users" element={<Users />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/take-assessment/:id" element={<TakeAssessment />} />
+        <Route path="/preview-assessment/:id" element={<Preview />} />
         <Route path="/student/assessments" element={<StudentAssessment />} />
         <Route path="/score" element={<ScorePage />} />
         <Route path="/code-generator" element={<CodeGenerator />} />

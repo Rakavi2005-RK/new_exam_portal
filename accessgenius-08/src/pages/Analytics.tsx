@@ -13,11 +13,15 @@ import {
   Cell
 } from 'recharts';
 
+import React, { useState,useEffect } from 'react';
+import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, Users, Book, Award } from 'lucide-react';
 import ProgressChart, { DualChart } from '@/components/dashboard/ProgressChart';
 import MainLayout from '@/components/layout/MainLayout';
 import ActivityList from '@/components/dashboard/ActivityList';
+import axios from 'axios';
 
 const userPerformance = 
   [
@@ -50,6 +54,17 @@ const topicPerformanceData = [
   { date: '2025-05-09', topic: 'Statistics', score: 90, difficulty: 'hard' },
   { date: '2025-05-10', topic: 'Algebra', score: 80, difficulty: 'easy' },
   // Add more dummy data across multiple dates and months
+
+// Sample data for charts
+
+const performanceData = [
+  { name: 'Jan', highest: 85, average: 75, lowest: 65 },
+  { name: 'Feb', highest: 88, average: 78, lowest: 67 },
+  { name: 'Mar', highest: 90, average: 80, lowest: 70 },
+  { name: 'Apr', highest: 92, average: 82, lowest: 72 },
+  { name: 'May', highest: 94, average: 84, lowest: 74 },
+  { name: 'Jun', highest: 96, average: 86, lowest: 76 },
+
 ];
 const difficultyColors = {
   easy: '#34d399',    
@@ -75,6 +90,7 @@ const completionData = [
   { name: 'May', assigned: 25, completed: 22 },
   { name: 'Jun', assigned: 28, completed: 25 },
 ];
+
 
 const recentActivities = [
   {
@@ -106,6 +122,7 @@ const recentActivities = [
   },
 ];
 
+
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
@@ -121,6 +138,7 @@ const CustomTooltip = ({ active, payload }) => {
 
 
 const Analytics = () => {
+
   const dummyFirstLoginYear = 2021;
   const currentYear = new Date().getFullYear();
 
@@ -192,6 +210,36 @@ const getDifficulty = (topic) => {
 
   const getBarColor = (value) => (value < 75 ? '#ef4444' : '#3b82f6'); 
 
+
+ const [recentActivities, setrecentActivities] = useState<any[]>([]);
+const [totalAssessments, setTotalAssessments] = useState<any[]>([]);
+useEffect(() => {
+  
+  const fetchRecentActivities = async () => {
+    try {
+      const user_id = localStorage.getItem("user_id");
+      const res=await axios.post('http://127.0.0.1:5000/recent_activity',{user_id})
+      setrecentActivities(res.data);
+    } 
+    catch (error) {
+      console.error('Error fetching recent activities:', error);
+    }
+  };
+   
+  const total_assessments= async () => {
+    try {
+      const user_id = localStorage.getItem("user_id");
+      const res=await axios.post('http://127.0.0.1:5000/total_assessment',{user_id})
+      setTotalAssessments(res.data);
+    }
+    catch (error) {
+      console.error('Error fetching total assessments:', error);
+    }}
+    fetchRecentActivities();
+    total_assessments();
+},[]);
+
+
   return (
     <MainLayout>
       <div className="flex flex-col gap-6 p-6 overflow-x-hidden max-w-screen">
@@ -209,14 +257,17 @@ const getDifficulty = (topic) => {
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
-                <div className="text-2xl font-bold">248</div>
+                <div className="text-2xl font-bold">{totalAssessments?.total_assessment?? "Loading..."}</div>
                 <Book className="h-8 w-8 text-muted-foreground/70" />
               </div>
-              <p className="text-xs text-muted-foreground">+12% from last month</p>
+              <p className="text-xs text-muted-foreground">{totalAssessments?.percentage ?? "0%"} from last month</p>
             </CardContent>
           </Card>
 
+
           <Card>
+
+     { /*    <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Active Students</CardTitle>
             </CardHeader>
@@ -225,7 +276,24 @@ const getDifficulty = (topic) => {
                 <div className="text-2xl font-bold">1,245</div>
                 <Users className="h-8 w-8 text-muted-foreground/70" />
               </div>
+
               <p className="text-xs text-muted-foreground">+8% from last month</p>
+
+              <p className="text-xs text-muted-foreground">+5% from last month</p>
+            </CardContent>
+          </Card> */}
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Average Score</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="text-2xl font-bold">{totalAssessments?.average?? "0%"}</div>
+                <Award className="h-8 w-8 text-muted-foreground/70" />
+              </div>
+              <p className="text-xs text-muted-foreground">{totalAssessments?.approxi_average?? 0} from last month</p>
+
             </CardContent>
           </Card>
         </div>
