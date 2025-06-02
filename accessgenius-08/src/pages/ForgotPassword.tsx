@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { X, Eye, EyeOff } from "lucide-react";
+import axios from "axios";
 
 export default function ForgotPassword() {
   const [step, setStep] = useState<"email" | "otp" | "reset">("email");
@@ -26,7 +27,7 @@ export default function ForgotPassword() {
 
   const navigate = useNavigate();
 
-  const handleSendOtp = () => {
+  const handleSendOtp = async () => {
     if (!emailForReset) {
       toast({
         title: "Error",
@@ -45,28 +46,43 @@ export default function ForgotPassword() {
       });
       return;
     }
-
+     try {
+    const res = await axios.post("http://127.0.0.1:5000/send-otp", { email: emailForReset });
+    if (res.status === 200) {
+      toast({
+        title: "OTP Sent",
+        description: res.data?.message || `An OTP has been sent to ${emailForReset}`,
+      });
+      setStep("otp");
+      setResendTimer(30);
+      setCanResend(false);
+      let timer = 30;
+      const interval = setInterval(() => {
+        timer--;
+        setResendTimer(timer);
+        if (timer <= 0) {
+          clearInterval(interval);
+          setCanResend(true);
+        }
+      }, 1000);
+    } else {
+      toast({
+        title: "Error",
+        description: res.data?.message || "Failed to send OTP.",
+        variant: "destructive",
+      });
+    }
+  } catch (error: any) {
     toast({
-      title: "OTP Sent",
-      description: `An OTP has been sent to ${emailForReset}`,
+      title: "Error",
+      description: error?.response?.data?.message || "Failed to send OTP.",
+      variant: "destructive",
     });
-    setStep("otp");
+  }
 
-    // Start the resend timer
-    setResendTimer(30);
-    setCanResend(false);
-    let timer = 30;
-    const interval = setInterval(() => {
-      timer--;
-      setResendTimer(timer);
-      if (timer <= 0) {
-        clearInterval(interval);
-        setCanResend(true);
-      }
-    }, 1000);
   };
 
-  const handleVerifyOtp = () => {
+  const handleVerifyOtp = async () => {
     if (!otp) {
       toast({
         title: "Error",
@@ -84,15 +100,32 @@ export default function ForgotPassword() {
       });
       return;
     }
-
+      try {
+    const res = await axios.post("http://127.0.0.1:5000/verify-otp", { email: emailForReset, otp });
+    if (res.status === 200) {
+      toast({
+        title: "Success",
+        description: res.data?.message || "OTP verified successfully!",
+      });
+      setStep("reset");
+    } else {
+      toast({
+        title: "Error",
+        description: res.data?.message || "Invalid OTP.",
+        variant: "destructive",
+      });
+    }
+  } catch (error: any) {
     toast({
-      title: "Success",
-      description: "OTP verified successfully!",
+      title: "Error",
+      description: error?.response?.data?.message || "Failed to verify OTP.",
+      variant: "destructive",
     });
-    setStep("reset");
+  }
+
   };
 
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     if (!newPassword || !confirmPassword) {
       toast({
         title: "Error",
@@ -109,16 +142,36 @@ export default function ForgotPassword() {
       });
       return;
     }
-
-    toast({
-      title: "Password Reset Success",
-      description: "Your password has been successfully reset.",
+      try {
+    const res = await axios.post("http://127.0.0.1:5000/reset-password", {
+      actions: "reset_password",
+      email: emailForReset,
+      new_password: newPassword,
+      confirm_password: confirmPassword,
     });
-
-    setIsDialogOpen(false);
-    setTimeout(() => {
-      navigate("/login");
-    }, 1000);
+    if (res.status === 200) {
+      toast({
+        title: "Password Reset Success",
+        description: res.data?.message || "Your password has been successfully reset.",
+      });
+      setIsDialogOpen(false);
+      setTimeout(() => {
+        navigate("/login");
+      }, 1000);
+    } else {
+      toast({
+        title: "Error",
+        description: res.data?.message || "Failed to reset password.",
+        variant: "destructive",
+      });
+    }
+  } catch (error: any) {
+    toast({
+      title: "Error",
+      description: error?.response?.data?.message || "Failed to reset password.",
+      variant: "destructive",
+    });
+  }
   };
 
   const handleDialogClose = () => {

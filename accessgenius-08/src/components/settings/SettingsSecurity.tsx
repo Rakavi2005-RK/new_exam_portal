@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
+//import { useToast } from "@/components/ui/use-toast";
 import {
   Form,
   FormControl,
@@ -19,6 +19,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
 import { Shield, AlertTriangle } from "lucide-react";
 import axios from "axios";
+import { toast } from "sonner";
 
 const passwordFormSchema = z.object({
   currentPassword: z.string().min(8, {
@@ -44,7 +45,7 @@ type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 type TwoFactorFormValues = z.infer<typeof twoFactorSchema>;
 
 const SettingsSecurity = () => {
-  const { toast } = useToast();
+  //const { toast } = useToast();
   
   const passwordForm = useForm<PasswordFormValues>({
     resolver: zodResolver(passwordFormSchema),
@@ -67,42 +68,38 @@ const SettingsSecurity = () => {
     const actions="update_password"
     
     const arr={actions,user_id,data}
-    try{
-    const res=await axios.post("http://127.0.0.1:5000/reset-password",arr)
-    if (res)
-    {
-      console.log("successfull")
+      try {
+    const res = await axios.post("http://127.0.0.1:5000/reset-password", arr);
+    if (res.status === 200) {
+       toast.success(res.data?.message || "Your password has been updated successfully.");
+      passwordForm.reset({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } else {
+       toast.error(res.data?.message || "Failed to update password.");
     }
-    }
-    catch(error)
-    {
-      console.log("error:",error)
-    }
-    toast({
-      title: "Password updated",
-      description: "Your password has been updated successfully.",
-    });
-    
-    console.log(data);
-    passwordForm.reset({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
+  } catch (error: any) {
+      toast.error(
+    error?.response?.data?.message || "Failed to update password."
+  );
+  }
   }
   // delete call
   const onDelete=async() =>{
-    try{
-      const res=await axios.post("http://127.0.0.1:5000/delete",{user_id})
-      if (res)
-      {
-        console.log("successfull")
-      }
+      try {
+    const res = await axios.post("http://127.0.0.1:5000/delete", { user_id });
+    if (res.status === 200) {
+      toast.success(res.data?.message || "Your account has been deleted.");
+     
+    } else {
+      toast.error(res.data?.message || "Failed to delete account.");
     }
-    catch(error)
-    {
-      console.log("error:",error)
-    }
+  } catch (error: any) {
+    toast.error(error?.response?.data?.message || "Failed to delete account.");
+   
+  }
 
   }
 

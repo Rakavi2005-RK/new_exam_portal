@@ -20,10 +20,12 @@ import Groups from './pages/Groups';
 import CodeGenerator from './pages/CodeGenerator';
 import Feedback from './pages/Feedback';
 import Preview from './pages/Preview';
+import { Toaster } from './components/ui/toaster';
 
 const App: React.FC = () => {
   return (
     <Router>
+       <Toaster />
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<Login />} />

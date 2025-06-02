@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Brain, Sparkles } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 import axios from 'axios';
 
 const formSchema = z.object({
@@ -80,7 +80,10 @@ const AssessmentGenerator: React.FC = () => {
 
   const handleSubmit = async (values: FormValues) => {
     if (remainingAssessments <= 0) {
-      toast.error("Daily limit reached. Try again tomorrow.");
+      toast({
+        title: "Limit Reached",
+        description: "You have reached the daily limit of 3 assessments. Please try again tomorrow.",
+      })
       return;
     }
 
@@ -96,15 +99,22 @@ const AssessmentGenerator: React.FC = () => {
 
       await new Promise(resolve => setTimeout(resolve, 2500)); // Simulate delay
 
-      toast.success("Assessment generated successfully!");
+      toast({
+        title: "Assessment Generated",
+        description: "Your assessment has been successfully generated.",
+      })
       tracker.count += 1;
       setRemainingAssessments(3 - tracker.count);
       localStorage.setItem(key, JSON.stringify(tracker));
       window.location.href = "/dashboard";
 
     } catch (error) {
-      toast.error("Failed to generate assessment. Please try again.");
-      console.error("Error generating assessment:", error);
+      toast({
+        title: "Error",
+        description: error?.response?.data?.message || "Failed to generate assessment. Please try again.",
+        variant: "destructive",
+      })
+     
     } finally {
       setIsGenerating(false);
     }

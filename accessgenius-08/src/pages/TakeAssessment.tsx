@@ -112,7 +112,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import AssessmentTaker from "@/components/assessments/AssessmentTaker";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLocation } from "react-router-dom";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 import { useEffect } from "react";
 import axios from "axios";
 import type { AssessmentTakerProps } from "@/components/assessments/AssessmentTaker";
@@ -124,7 +124,6 @@ const TakeAssessment: React.FC = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const location = useLocation();
   const {score_id } = location.state || {};
-  console.log(score_id);
   const user_id = localStorage.getItem("user_id");
   const data= {
        user_id:user_id,       
@@ -146,7 +145,6 @@ const TakeAssessment: React.FC = () => {
       headers: { "Content-Type": "application/json" },
     })
     .then((response) => {
-      console.log(response.data);
       setAssessmentdata({
         assessmentId: score_id,
         title: response.data.title,
@@ -157,7 +155,11 @@ const TakeAssessment: React.FC = () => {
       });
     })
     .catch((error) => {
-      console.error("Failed to load questions:", error);
+        toast({
+      title: "Error",
+      description: error?.response?.data?.message || "Failed to load assessment questions.",
+      variant: "destructive",
+    });
     });
   };
 
@@ -171,7 +173,11 @@ const TakeAssessment: React.FC = () => {
       console.log("Exam status updated to exit.");
     })
     .catch((err) => {
-      console.error("Failed to update status on reload:", err);
+      toast({
+      title: "Error",
+      description: err?.response?.data?.message || "Failed to update exam status on reload.",
+      variant: "destructive",
+    });
     });
     localStorage.setItem("exam_over", "true");
     setrefreshed(true);
@@ -201,10 +207,23 @@ const TakeAssessment: React.FC = () => {
     });
 
     if (res.status === 200) {
-      console.log("Submission successful:", res.data);
+          toast({
+        title: "Assessment Submitted",
+        description: res.data?.message || "Your assessment was submitted successfully.",
+      });
     }
+     else{   toast({
+        title: "Error",
+        description: res.data?.message || "Failed to submit assessment.",
+        variant: "destructive",
+      });}
   } catch (error) {
-    console.error("Error submitting assessment:", error);
+    console.error("Failed to submit assessment:", error);
+    toast({
+      title: "Error",
+      description: error?.response?.data?.message || "Failed to submit assessment.",
+      variant: "destructive",
+    });
   }
 
   setTimeout(() => {
@@ -213,9 +232,11 @@ const TakeAssessment: React.FC = () => {
 };
 
   const handleCancel = () => {
-    toast.warning("Assessment canceled", {
-      description: "Your progress will not be saved."
-    });
+    toast({
+    title: "Assessment canceled",
+    description: "Your progress will not be saved.",
+    variant: "destructive",
+  });
     navigate("/dashboard");
   };
 
@@ -275,7 +296,7 @@ if (!assessmentData) {
       timeLimit={assessmentData.timeLimit}
       questions={assessmentData.questions}
       onComplete={handleComplete}
-      onCancel={handleCancel}
+     // onCancel={handleCancel}
     />
     
   );
