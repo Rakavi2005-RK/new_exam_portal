@@ -126,6 +126,7 @@ export default function ForgotPassword() {
   };
 
   const handleResetPassword = async () => {
+  const handleResetPassword = async () => {
     if (!newPassword || !confirmPassword) {
       toast({
         title: "Error",

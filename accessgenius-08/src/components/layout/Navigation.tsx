@@ -7,6 +7,7 @@ interface NavItem {
   href: string;
   icon: React.ReactNode;
   roles?: string[];
+  hideOnMobile ?: boolean;
 }
 
 interface NavigationProps {
@@ -27,7 +28,8 @@ export const Navigation: React.FC<NavigationProps> = ({ items, bottomItems = [],
     >
       {/* Top/Main Nav */}
       <div className="flex flex-col gap-1">
-        {items.map((item) => (
+        {items.filter(item => !(mobile && item.hideOnMobile))
+        .map((item) => (
           <Link
             key={item.href}
             to={item.href}

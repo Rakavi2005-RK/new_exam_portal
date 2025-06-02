@@ -4,7 +4,7 @@ import Logo from '@/components/ui/Logo';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useBreakpoint } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import { Navigation } from './Navigation';
 import { HeaderActions } from './HeaderActions';
@@ -15,7 +15,7 @@ interface MainLayoutProps {
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-  const isMobile = useIsMobile();
+  const {isMobile,isTablet} = useBreakpoint();
   const location = useLocation();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -54,12 +54,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="fixed top-0 left-0 w-full h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between py-4">
+        <div className="flex h-16 items-center justify-between py-4 px-4 w-full">
           <div className="flex items-center gap-2">
-            {isAuthenticated && isMobile && (
+            {isAuthenticated && (isMobile ||isTablet) && (
               <Sheet>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon" className="mr-2">
@@ -91,7 +91,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       {/* Main content */}
       <div className="flex-1 flex">
         {isAuthenticated && !isMobile && (
-          <aside className="w-64 border-r bg-sidebar px-4 py-6 hidden md:block">
+          <aside className="w-64 fixed top-16 bottom-0 left-0 border-r bg-sidebar px-4 py-6 hidden md:block overflow-y-auto">
             <Navigation 
               items={filteredMainNavItems} 
               bottomItems={filteredBottomNavItems} 
@@ -100,7 +100,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         )}
 
         <main className={cn(
-          "flex-1 py-6 px-6", 
+          "flex-1 ml-0 md:ml-64 overflow-y-auto h-[calc(100vh-4rem)] py-6 px-6", 
           pageTransition ? "page-transition-enter page-transition-enter-active" : ""
         )}>
           {children}
