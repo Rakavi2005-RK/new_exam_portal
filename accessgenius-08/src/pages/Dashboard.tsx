@@ -4,6 +4,9 @@ import { Link, useNavigate,To } from "react-router-dom";
 import MainLayout from "@/components/layout/MainLayout";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardStats from "@/components/dashboard/DashboardStats";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import {
   Card,
   CardContent,
@@ -11,6 +14,7 @@ import {
   CardHeader,
   CardTitle
 } from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -28,17 +32,31 @@ import {
 } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { FileText, ChevronRight } from "lucide-react";
+
+import { useBreakpoint } from "@/hooks/use-mobile";
+
 import axios from "axios";
 
 
 const user_id = localStorage.getItem("user_id");
 const status = "pending";
 
+
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>("pending");
   const [assessments, setAssessments] = useState([]);
   const [currentUser, setCurrentUser] = useState({ name: "" }); 
   const navigate = useNavigate();
+  const { isMobile, isTablet } = useBreakpoint();
+
+
+  const filteredAssessments = assessments.filter(
+    (assessment) => assessment.status === activeTab
+  );
+
+  return (
+    <MainLayout>
+      <div className="py-6 space-y-8 animate-fade-in overflow-x-hidden">
 
   const request = { user_id };
 
@@ -67,6 +85,7 @@ const Dashboard: React.FC = () => {
   return (
     <MainLayout>
       <div className="py-6 space-y-8 animate-fade-in">
+
         <DashboardHeader
           title={`Welcome, ${currentUser.name}`}
           description="Track your assessment progress and upcoming deadlines"
@@ -74,26 +93,68 @@ const Dashboard: React.FC = () => {
 
         {/*<DashboardStats role="student" />*/}
 
-        <Card className="shadow-sm">
+        <Card>
           <CardHeader>
             <CardTitle>My Assessments</CardTitle>
             <CardDescription>
               View and complete your assigned assessments
             </CardDescription>
+
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="pending" onValueChange={setActiveTab}>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="mb-4">
                 <TabsTrigger value="pending">Pending</TabsTrigger>
                 <TabsTrigger value="completed">Completed</TabsTrigger>
               </TabsList>
+
+              <TabsContent value={activeTab}>
+                {isMobile || isTablet ? (
+                  <div className="space-y-4">
+                    {filteredAssessments.map((assessment) => (
+                      <Card key={assessment.id} className="p-4">
+                        <div className="mb-2 text-base font-semibold">
+                          {assessment.title}
+                        </div>
+                        <div className="text-sm text-muted-foreground mb-1">
+                          <strong>Subject:</strong> {assessment.subject}
+                        </div>
+                        <div className="text-sm text-muted-foreground mb-1">
+                          <strong>Teacher:</strong> {assessment.teacher}
+                        </div>
+                        <div className="text-sm text-muted-foreground mb-1">
+                          <strong>Due Date:</strong> {assessment.dueDate}
+                        </div>
+                        <div className="text-sm text-muted-foreground mb-2">
+                          <strong>Status:</strong>{" "}
+                          <Badge
+                            variant="outline"
+                            className={
+                              assessment.status === "pending"
+                                ? "bg-yellow-50 text-yellow-700 border-yellow-200"
+                                : "bg-green-50 text-green-700 border-green-200"
+                            }
+                          >
+                            {assessment.status.charAt(0).toUpperCase() +
+                              assessment.status.slice(1)}
+                          </Badge>
+                        </div>
+                        <Button asChild size="sm">
+                          <Link to={`/take-assessment/${assessment.id}`}>
+                            Start <ChevronRight className="ml-1 h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </Card>
+                    ))}
+
               <TabsContent value={activeTab} className="space-y-4">
                 {filteredAssessments.length === 0 ? (
                   <div className="p-8 text-center text-muted-foreground">
                     No {activeTab} assessments found.
+
                   </div>
                 ) : (
-                  <Table>
+                  <Table className="text-sm">
                     <TableHeader>
                       <TableRow>
                         <TableHead>Title</TableHead>
@@ -129,9 +190,11 @@ const Dashboard: React.FC = () => {
                                   : "bg-green-50 text-green-700 border-green-200"
                               }
                             >
+
                               {assessment.status
                                 .charAt(0)
                                 .toUpperCase() +
+
                                 assessment.status.slice(1)}
                             </Badge>
                           </TableCell>

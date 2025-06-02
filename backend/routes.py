@@ -62,7 +62,7 @@ def login():
 @routes.route('/send-otp', methods=['POST'])
 def send_otp():
     data = request.json
-    email = data.get("email")
+    email = data.get("emailForReset")
     
     user = User.query.filter_by(email=email).first()
     if not user:
@@ -83,12 +83,13 @@ def send_otp():
 @routes.route('/verify-otp', methods=['POST'])
 def verify_otp():
     data = request.json
-    email = data.get("email")
+    email = data.get("emailForReset")
     otp = data.get("otp")
-
+    print(otp)
+    print(otp_storage)
     if email not in otp_storage or otp_storage[email] != otp:
         return jsonify({"message": "Invalid OTP"}), 400
-
+   
     del otp_storage[email]  
     return jsonify({"message": "OTP verified successfully"}), 200
 
@@ -96,31 +97,32 @@ def verify_otp():
 @routes.route('/reset-password', methods=['POST'])
 def reset_password():
     data=request.json 
-    details=data["data"] 
-    new_password = details["newPassword"]
     # reset-password
     if data["actions"]=="reset_password":
-        email = data["email"]
+        email = data["emailForReset"]
+        new_password=data["newPassword"]
         user = User.query.filter_by(email=email).first()
-        if not user:
-            return jsonify({"message": "User not found!"}), 400
+        """if not user:
+            return jsonify({"message": "User not found!"}), 400"""
         hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
         user.password_hash= hashed_password
         db.session.commit()
     # update-password
     elif  data["actions"]=="update_password":
         id=data["user_id"]
+        details=data["data"] 
+        new_password = details["newPassword"]
         user=User.query.filter_by(id=id).first()
         old_password=details["currentPassword"]
         if not bcrypt.check_password_hash(user.password_hash,old_password):
-            return("password does not match")
+            return jsonify({"message":"password does not match"}),400
     
         hashed=bcrypt.generate_password_hash(new_password).decode('utf-8')
         user.password_hash=hashed
         db.session.commit()
-        return("successful")
+        
     else:
-        return("something went wrong!!!")
+        return jsonify({"message":"something went wrong!!!"}),400
 
 
     return jsonify({"message": "Password reset successful!"}),200
@@ -305,8 +307,6 @@ def feedBack():
                 recipients=[current_app.config["MAIL_USERNAME"]],
                 body=body)
     msg.reply_to=email_id
-    print(current_app.config["MAIL_USERNAME"])
-    print(mail.send(msg))
     try:
         mail.send(msg)
     except Exception as e:
@@ -405,7 +405,6 @@ def generate_assessment():
     except Exception as e:
                 return Response(f"Google AI Error: {str(e)}", status=500, mimetype="text/plain")
     
-
 @routes.route("/start",methods=["POST"])
 def start():
     data=request.json
@@ -457,10 +456,55 @@ def delete():
     details=request.json
     user_id=details["user_id"]
     user=User.query.filter_by(id=user_id).first()
-    if  user:
-        db.session.delete(user)
-        db.session.commit()
-    return("successful")
+    try:
+        if  user:
+            db.session.delete(user)
+            db.session.commit()
+    except Exception as e:
+        return jsonify({"message":"Something went wrong!!! Try again"}),400
+    return jsonify(),200
+
+# code generator
+@routes.route("/code_generator",methods=["POST"])
+def code_generator():
+    data=request.json
+    query=data["query"]
+    language=data["language"]
+    api_key=Config.API_KEY1
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel(
+        model_name="gemini-2.0-flash",
+        generation_config={
+        "temperature": 0.2,
+        "top_p": 1,
+        "top_k": 1,
+        "max_output_tokens": 2048,
+        })
+        code_prompt = f"""
+                    Generate the code in {language} for the following task: {query}.
+                     Include in-line comments in the code (explain key steps briefly).
+                     Do NOT use Markdown formatting.
+                     Return a proper explanation of the code in plain text (no markdown).
+                     Respond strictly in JSON format like this:
+                     {{
+                     "code":"print(\\"hello\\"),
+                     "explanation":""print is a built-in Python function. It's used to send output to the standard output device, usually the console or terminal. 
+                     \\"hello\\" is a string literal, i.e., a sequence of characters surrounded by quotes (\\\" \\\" or '\\' '). 
+                     Here, it's the argument to the print() function. Python passes \\"hello\\" into the print() function to be displayed.""
+                     }} 
+                     Only return a valid JSON object. Do not include anything outside the JSON."""
+        code_response = model.generate_content(code_prompt)
+        code = re.sub(r"```json\n|\n```", "",code_response.text).strip()
+        code_json=json.loads(code)
+        
+    except Exception as e:
+        return jsonify({"message":"{e},something went wrong"}),400
+    return jsonify({"code":code_json["code"],"explanation":code_json["explanation"]}),200
+    
+
+
+    
 
 #submitted answers
 @routes.route("/submitting",methods=["POST"])

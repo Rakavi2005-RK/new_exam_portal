@@ -59,8 +59,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           <div className="flex gap-2">
             <Dialog open={showGenerator} onOpenChange={setShowGenerator}>
               <DialogTrigger asChild>
-                <Button className="flex items-center">
-                  <Plus className="mr-2 h-4 w-4" /> Take New Assessment
+                <Button className="flex items-center whitespace-nowrap text-base px-5 py-2 sm:text-sm sm:px-4 sm:py-2">
+                  <Plus className="mr-2 h-4 w-4 sm:h-3 sm:w-3" />Take New Assessment
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[900px]">
