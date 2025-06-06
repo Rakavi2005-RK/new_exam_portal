@@ -162,6 +162,17 @@ const TakeAssessment: React.FC = () => {
   };
 
   if (alreadyLoaded) {
+    axios.post("http://localhost:5000/update_exam_status", {
+      user_id,
+      score_id,
+      status: "exit",
+    })
+    .then(() => {
+      console.log("Exam status updated to exit.");
+    })
+    .catch((err) => {
+      console.error("Failed to update status on reload:", err);
+    });
     localStorage.setItem("exam_over", "true");
     setrefreshed(true);
   } else {

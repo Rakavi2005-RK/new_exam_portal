@@ -18,7 +18,7 @@ const Feedback: React.FC = () => {
   const [feedbackType, setFeedbackType] = useState<string>('');
   const [feedbackText, setFeedbackText] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
+// request to feedback
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -35,27 +35,26 @@ const Feedback: React.FC = () => {
     setIsSubmitting(true);
     const user_id=localStorage.getItem("user_id");
     const arr={user_id,feedbackType,feedbackText}
+    // request to feedback
     try{
     const res=await axios.post("http://127.0.0.1:5000/feedback",
       arr
     )
-      if(res)
-      {
-        console.log("success")
-      }}
-    catch(error)
-    {
-      console.error(error);
-    }
-    
-    
-    // Simulate sending feedback
-    setTimeout(() => {
+      setTimeout(() => {
       toast.success('Thank you for your feedback!');
       setFeedbackType('');
       setFeedbackText('');
       setIsSubmitting(false);
     }, 1500);
+}
+    catch(error)
+    {
+      toast.error(error.response?.data?.message || "something went wrong");
+    }
+    
+    
+    // Simulate sending feedback
+
     
     // In a real app, you would send this to your backend
     // const response = await fetch('/api/feedback', {
