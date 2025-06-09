@@ -5,8 +5,6 @@ import MainLayout from "@/components/layout/MainLayout";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 import {
   Card,
   CardContent,
@@ -49,14 +47,6 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { isMobile, isTablet } = useBreakpoint();
 
-
-  const filteredAssessments = assessments.filter(
-    (assessment) => assessment.status === activeTab
-  );
-
-  return (
-    <MainLayout>
-      <div className="py-6 space-y-8 animate-fade-in overflow-x-hidden">
 
   const request = { user_id };
 
@@ -108,8 +98,9 @@ const Dashboard: React.FC = () => {
                 <TabsTrigger value="completed">Completed</TabsTrigger>
               </TabsList>
 
-              <TabsContent value={activeTab}>
-                {isMobile || isTablet ? (
+              {/* Mobile/Tablet view */}
+              {(isMobile || isTablet) ? (
+                <TabsContent value={activeTab}>
                   <div className="space-y-4">
                     {filteredAssessments.map((assessment) => (
                       <Card key={assessment.id} className="p-4">
@@ -146,84 +137,90 @@ const Dashboard: React.FC = () => {
                         </Button>
                       </Card>
                     ))}
-
-              <TabsContent value={activeTab} className="space-y-4">
-                {filteredAssessments.length === 0 ? (
-                  <div className="p-8 text-center text-muted-foreground">
-                    No {activeTab} assessments found.
-
                   </div>
-                ) : (
-                  <Table className="text-sm">
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Title</TableHead>
-                        <TableHead>Subject</TableHead>
-                        <TableHead>Created</TableHead>
-                        <TableHead>Due Date</TableHead>
-                        <TableHead>Status</TableHead>
-                        {activeTab==='pending'?(
-                        <TableHead>Action</TableHead>):(<TableHead>Score</TableHead>)
-                        } 
-                        {activeTab==="completed"?
-                        (<TableHead>preview</TableHead>):null}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredAssessments.map((assessment) => ( 
-                        <TableRow key={assessment.id}>
-                          <TableCell className="font-medium">
-                            <div className="flex items-center">
-                              <FileText className="mr-2 h-4 w-4 text-primary" />
-                              {assessment.topic}
-                            </div>
-                          </TableCell>
-                          <TableCell>{assessment.subject}</TableCell>
-                          <TableCell>{assessment.created_at}</TableCell>
-                          <TableCell>{assessment.due_date}</TableCell>
-                          <TableCell>
-                            <Badge
-                              variant="outline"
-                              className={
-                                assessment.status === "pending"
-                                  ? "bg-yellow-50 text-yellow-700 border-yellow-200"
-                                  : "bg-green-50 text-green-700 border-green-200"
-                              }
-                            >
-
-                              {assessment.status
-                                .charAt(0)
-                                .toUpperCase() +
-
-                                assessment.status.slice(1)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell >
-                            {activeTab=='pending'?(
-                           <Link to={{pathname: `/take-assessment/${assessment.id}`,}}
-                              state={{ score_id: assessment.id }}>
-                              <Button variant="default" size="sm">
-                                Start <ChevronRight className="ml-1 h-4 w-4" />
-                              </Button>
-                            </Link>):(<TableCell >{assessment.score ?? 0}</TableCell>)}
-                            
-                          </TableCell>
-                          <TableCell >
-                            {activeTab=='completed'?(
-                           <Link to={{pathname: `/preview-assessment/${assessment.id}`,}}
-                              state={{ score_id: assessment.id }}>
-                              <Button variant="default" size="sm">
-                                preview <ChevronRight className="ml-1 h-4 w-4" />
-                              </Button>
-                            </Link>):null}
-                            
-                          </TableCell>
+                </TabsContent>
+              ) : (
+                // Desktop view
+                <TabsContent value={activeTab} className="space-y-4">
+                  {filteredAssessments.length === 0 ? (
+                    <div className="p-8 text-center text-muted-foreground">
+                      No {activeTab} assessments found.
+                    </div>
+                  ) : (
+                    <Table className="text-sm">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Title</TableHead>
+                          <TableHead>Subject</TableHead>
+                          <TableHead>Created</TableHead>
+                          <TableHead>Due Date</TableHead>
+                          <TableHead>Status</TableHead>
+                          {activeTab === 'pending' ? (
+                            <TableHead>Action</TableHead>
+                          ) : (
+                            <TableHead>Score</TableHead>
+                          )}
+                          {activeTab === "completed" ? (
+                            <TableHead>preview</TableHead>
+                          ) : null}
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </TabsContent>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredAssessments.map((assessment) => (
+                          <TableRow key={assessment.id}>
+                            <TableCell className="font-medium">
+                              <div className="flex items-center">
+                                <FileText className="mr-2 h-4 w-4 text-primary" />
+                                {assessment.topic}
+                              </div>
+                            </TableCell>
+                            <TableCell>{assessment.subject}</TableCell>
+                            <TableCell>{assessment.created_at}</TableCell>
+                            <TableCell>{assessment.due_date}</TableCell>
+                            <TableCell>
+                              <Badge
+                                variant="outline"
+                                className={
+                                  assessment.status === "pending"
+                                    ? "bg-yellow-50 text-yellow-700 border-yellow-200"
+                                    : "bg-green-50 text-green-700 border-green-200"
+                                }
+                              >
+                                {assessment.status
+                                  .charAt(0)
+                                  .toUpperCase() +
+                                  assessment.status.slice(1)}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {activeTab === 'pending' ? (
+                                <Link to={{ pathname: `/take-assessment/${assessment.id}` }}
+                                  state={{ score_id: assessment.id }}>
+                                  <Button variant="default" size="sm">
+                                    Start <ChevronRight className="ml-1 h-4 w-4" />
+                                  </Button>
+                                </Link>
+                              ) : (
+                                <span>{assessment.score ?? 0}</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {activeTab === 'completed' ? (
+                                <Link to={{ pathname: `/preview-assessment/${assessment.id}` }}
+                                  state={{ score_id: assessment.id }}>
+                                  <Button variant="default" size="sm">
+                                    preview <ChevronRight className="ml-1 h-4 w-4" />
+                                  </Button>
+                                </Link>
+                              ) : null}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </TabsContent>
+              )}
             </Tabs>
           </CardContent>
         </Card>

@@ -21,6 +21,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [pageTransition, setPageTransition] = useState(false);
+  const authRoutes = ['/login', '/register'];
+  const isAuthPage = authRoutes.includes(location.pathname);
 
   useEffect(() => {
     const isPrivateRoute = !['/', '/login', '/register'].includes(location.pathname);
@@ -100,8 +102,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         )}
 
         <main className={cn(
-          "flex-1 ml-0 md:ml-64 overflow-y-auto h-[calc(100vh-4rem)] py-6 px-6", 
-          pageTransition ? "page-transition-enter page-transition-enter-active" : ""
+          "flex-1 overflow-y-auto h-[calc(100vh-4rem)] py-6 px-6", 
+          pageTransition ? "page-transition-enter page-transition-enter-active" : "",
+          isAuthenticated && isMobile ? "ml-64" : "",
+          pageTransition? "page-transition-enter page-transistion-enter-active": ""
         )}>
           {children}
         </main>

@@ -22,8 +22,8 @@ export const Navigation: React.FC<NavigationProps> = ({ items, bottomItems = [],
   return (
     <nav
       className={cn(
-        "flex flex-col h-full",
-        mobile ? "mt-4" : "justify-between"
+        "flex flex-col h-full justify-between",
+        //mobile ? "mt-4" : "justify-between"
       )}
     >
       {/* Top/Main Nav */}

@@ -19,7 +19,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from io import BytesIO
 from docx import Document
-from calendar import month_abbr
+from calendar import month_abbr,monthrange
 
 
 
@@ -447,7 +447,6 @@ def pending():
             Question.delete_expired(r)
         
     response={"user_name":user.username,"assessments":[{"id":r.id,"subject":r.subject,"topic":r.topic,"status":r.status.value,"created_at":r.time,"due_date":r.due_date}  for r in res if r.due_date.replace(tzinfo=tz)>datetime.now(tz) ]}
-    response={"user_name":user.username,"assessments":[{"id":r.id,"subject":r.subject,"topic":r.topic,"status":r.status.value,"created_at":r.time,"due_date":r.due_date,"score":r.score} for r in res]}
     return jsonify(response)
 
 # deleting the account
@@ -463,46 +462,6 @@ def delete():
     except Exception as e:
         return jsonify({"message":"Something went wrong!!! Try again"}),400
     return jsonify(),200
-
-# code generator
-@routes.route("/code_generator",methods=["POST"])
-def code_generator():
-    data=request.json
-    query=data["query"]
-    language=data["language"]
-    api_key=Config.API_KEY1
-    try:
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel(
-        model_name="gemini-2.0-flash",
-        generation_config={
-        "temperature": 0.2,
-        "top_p": 1,
-        "top_k": 1,
-        "max_output_tokens": 2048,
-        })
-        code_prompt = f"""
-                    Generate the code in {language} for the following task: {query}.
-                     Include in-line comments in the code (explain key steps briefly).
-                     Do NOT use Markdown formatting.
-                     Return a proper explanation of the code in plain text (no markdown).
-                     Respond strictly in JSON format like this:
-                     {{
-                     "code":"print(\\"hello\\"),
-                     "explanation":""print is a built-in Python function. It's used to send output to the standard output device, usually the console or terminal. 
-                     \\"hello\\" is a string literal, i.e., a sequence of characters surrounded by quotes (\\\" \\\" or '\\' '). 
-                     Here, it's the argument to the print() function. Python passes \\"hello\\" into the print() function to be displayed.""
-                     }} 
-                     Only return a valid JSON object. Do not include anything outside the JSON."""
-        code_response = model.generate_content(code_prompt)
-        code = re.sub(r"```json\n|\n```", "",code_response.text).strip()
-        code_json=json.loads(code)
-        
-    except Exception as e:
-        return jsonify({"message":"{e},something went wrong"}),400
-    return jsonify({"code":code_json["code"],"explanation":code_json["explanation"]}),200
-    
-
 
     
 
@@ -602,7 +561,7 @@ def recent_activity():
                     "status": u.status.value,
                     "description": f" scored {(u.score/30)*100}% on {u.topic}"
                 })
-            elif u.status.value == Status.pending:
+            elif u.status == Status.pending:
                 response.append({
                     "id": u.id,
                     "title": f"{u.subject} Assessment assigned ",
@@ -689,73 +648,86 @@ def analysis():
     try:
         data=request.json
         user_id=data["user_id"]
+        action=data["actions"]
        
         user=Score.query.filter_by(user_id=user_id).all()
         if not user:
             return jsonify({"message":"No assessments found"}),404
-        year=2025   
-        year_start=datetime.now(tz).replace(year=year,month=1,day=1,hour=0,minute=0,second=0,microsecond=0).replace(tzinfo=None)
-        year_end=(year_start + timedelta(days=365)).replace(hour=23,minute=59,second=59,microsecond=999999).replace(tzinfo=None)
+    
+        year=data["year"]
+        year_start=datetime(year,1,1,0,0,0,0)
+        year_end=datetime(year,12,31,23,59,59,999999)
         
 
         # nothing available in the specific year
         if not any(score.time >= year_start and score.time <= year_end for score in user):
             return jsonify({"message": "No assessments found for the specified year"}), 404
-        
-        average_scores=[]
-        subject_scores = []
-        topic_scores=[]
-       # month wise average scores
-        average_stats=(
-           db.session.query(
-               extract('month',Score.time).label('month'),
-               func.avg(Score.score).label('average_score'),
-               func.count(Score.id).label('total_assessments')
-           ) .filter(
-                Score.user_id == user_id,
-                Score.time >= year_start,
-                Score.time <= year_end
-           ).group_by('month').order_by('month').all()
-        )
+        if action=="average_score":    
+            average_scores=[]
+            subject_scores = []
+            topic_scores=[]
         # month wise average scores
-        subject_stats=(
+            average_stats=(
             db.session.query(
-                Score.subject,
-                extract('month',Score.time).label('month'), 
-                func.avg(Score.score).label('average_score')
-            ).filter(
-                Score.user_id == user_id,
-                Score.time >= year_start,
-                Score.time <= year_end
-            ).group_by(
-                Score.subject, 
-                'month'
-            ).order_by(
-                Score.subject, 
-                'month'
-            )
-        )
-        average_scores= [{"month": month_abbr[month], "average_score": average_score if average_score is not None else 0, "total_assessments": total_assessments}  for month, average_score, total_assessments in average_stats]
-        subject_scores = [{"month": month_abbr[month], "subject": subject, "average_score": average_score if average_score is not None else 0} for subject, month, average_score in subject_stats]
-        # topic wise scores
-        topic_stat=(
-            db.session.query(
-                Score.topic,
-                Score.time,
-                Score.score,
-                Score.difficulty
-            ).filter(
-                Score.user_id == user_id,
-                Score.time >= year_start,
-                Score.time <= year_end
-            ).order_by(
-                Score.topic, 
-                Score.time
-            )
-        )
-        topic_scores = [{'topic': topic, 'date':time.strftime("%Y-%m-%d"),'score': score if score is not None else 0,"difficulty":difficulty.value} for topic,time,score,difficulty in topic_stat]
+                extract('month',Score.time).label('month'),
+                func.avg(Score.score).label('average_score'),
+                func.count(Score.id).label('total_assessments')
+            ) .filter(
+                    Score.user_id == user_id,
+                    Score.time >= year_start,
+                    Score.time <= year_end
+            ).group_by('month').order_by('month').all()
+            )  
+            return jsonify(average_scores),200   
+        # month wise subject average
+        
+        if action=="subject_score":  
+            month=data["month"]      
+            month_start=datetime(year,month,1)
+            last_day=monthrange(year,month)[1]   
+            month_end= datetime(year,month,last_day,23,59,59,999999) 
+            subject_stats=(
+                db.session.query(
+                    Score.subject,
+                    extract('month',Score.time).label('month'), 
+                    func.avg(Score.score).label('average_score')
+                ).filter(
+                    Score.user_id == user_id,
+                    Score.time >= month_start,
+                    Score.time <= month_end
+                ).group_by(
+                    Score.subject, extract('month',Score.time)
                 
-        return jsonify(average_scores,subject_scores,topic_scores), 200
+                ).order_by(
+                    Score.subject          
+                )
+            )
+            # topic wise scores
+            topic_stat=(
+                db.session.query(
+                    Score.topic,
+                    Score.time,
+                    Score.score,
+                    Score.difficulty
+                ).filter(
+                    Score.user_id == user_id,
+                    Score.time >= month_start,
+                    Score.time <= month_end
+                ).order_by(
+                    Score.topic, 
+                )
+            )
+        average_scores= [
+            {"month": month_abbr[month], "average_score": average_score if average_score is not None else 0, "total_assessments": total_assessments}  
+            for month, average_score, total_assessments in average_stats]
+        subject_scores = [
+                {"month": month_abbr[month], "subject": subject, "average_score": average_score if average_score is not None else 0} 
+                  for subject, month, average_score in subject_stats]
+
+        topic_scores = [{'topic': topic, 'date':time.strftime("%Y-%m-%d"),'score': score if score is not None else 0,"difficulty":difficulty.value} 
+                        for topic,time,score,difficulty in topic_stat]
+                
+        return jsonify(subject_scores,topic_scores), 200
        
             
     except Exception as e:

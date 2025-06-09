@@ -90,18 +90,17 @@ const SettingsSecurity = () => {
   }
   // request to delete 
   const onDelete=async() =>{
-      try {
-    const res = await axios.post("http://127.0.0.1:5000/delete", { user_id });
-    if (res.status === 200) {
-      toast.success(res.data?.message || "Your account has been deleted.");
-     
-    } else {
-      toast.error(res.data?.message || "Failed to delete account.");
+    try{
+      const res=await axios.post("http://127.0.0.1:5000/delete",{user_id})
+      if (res)
+      {
+        console.log("successfull")
+      }
     }
-  } catch (error: any) {
-    toast.error(error?.response?.data?.message || "Failed to delete account.");
-   
-  }
+    catch(error)
+    {
+      console.log("error:",error)
+    }
 
   }
 

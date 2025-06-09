@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LineChart,
   BarChart,
@@ -13,31 +13,15 @@ import {
   Cell
 } from 'recharts';
 
-import React, { useState,useEffect } from 'react';
-import { LineChart, BarChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, Users, Book, Award } from 'lucide-react';
 import ProgressChart, { DualChart } from '@/components/dashboard/ProgressChart';
 import MainLayout from '@/components/layout/MainLayout';
 import ActivityList from '@/components/dashboard/ActivityList';
 import axios from 'axios';
+import {toast} from '@/hooks/use-toast';
 
-const userPerformance = 
-  [
-    { name: 'Jan', average: 65, assessmentlength: 3 },
-    { name: 'Feb', average: 68, assessmentlength: 4 },
-    { name: 'Mar', average: 70, assessmentlength: 5 },
-    { name: 'Apr', average: 72, assessmentlength: 3 },
-    { name: 'May', average: 73, assessmentlength: 4 },
-    { name: 'Jun', average: 74, assessmentlength: 2 },
-    { name: 'Jul', average: 75, assessmentlength: 4 },
-    { name: 'Aug', average: 76, assessmentlength: 3 },
-    { name: 'Sep', average: 77, assessmentlength: 2 },
-    { name: 'Oct', average: 78, assessmentlength: 4 },
-    { name: 'Nov', average: 79, assessmentlength: 3 },
-    { name: 'Dec', average: 80, assessmentlength: 2 }
-  ];
+
 
   // Each entry is a test on a date, with topic, score and difficulty
 const topicPerformanceData = [
@@ -52,7 +36,7 @@ const topicPerformanceData = [
   { date: '2025-05-07', topic: 'Statistics', score: 90, difficulty: 'hard' },
   { date: '2025-05-08', topic: 'Algebra', score: 80, difficulty: 'easy' },
   { date: '2025-05-09', topic: 'Statistics', score: 90, difficulty: 'hard' },
-  { date: '2025-05-10', topic: 'Algebra', score: 80, difficulty: 'easy' },
+  { date: '2025-05-10', topic: 'Algebra', score: 80, difficulty: 'easy' },]
   // Add more dummy data across multiple dates and months
 
 // Sample data for charts
@@ -66,11 +50,7 @@ const performanceData = [
   { name: 'Jun', highest: 96, average: 86, lowest: 76 },
 
 ];
-const difficultyColors = {
-  easy: '#34d399',    
-  medium: '#fbbf24', 
-  hard: '#ef4444'  
-};
+
 
 
 const subjectPerformanceData = [
@@ -92,38 +72,16 @@ const completionData = [
 ];
 
 
-const recentActivities = [
-  {
-    id: '1',
-    title: 'Math Assessment Completed',
-    time: '2 hours ago',
-    user: { name: 'John Doe', avatar: undefined, initials: 'JD' },
-    status: 'completed',
-    type: 'assessment',
-    description: 'Scored 92% on Advanced Algebra assessment',
-  },
-  {
-    id: '2',
-    title: 'Science Quiz Assigned',
-    time: '4 hours ago',
-    user: { name: 'Jane Smith', avatar: undefined, initials: 'JS' },
-    status: 'pending',
-    type: 'assessment',
-    description: 'Physics Concepts Quiz due in 3 days',
-  },
-  {
-    id: '3',
-    title: 'Low Engagement Warning',
-    time: '1 day ago',
-    user: { name: 'System', avatar: undefined, initials: 'SY' },
-    status: 'warning',
-    type: 'alert',
-    description: '5 students have not logged in for over a week',
-  },
-];
 
+const difficultyColors = {
+  easy: '#34d399',    
+  medium: '#fbbf24', 
+  hard: '#ef4444'  
+};
 
-const CustomTooltip = ({ active, payload }) => {
+import type { TooltipProps } from 'recharts';
+
+const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
@@ -163,26 +121,80 @@ const Analytics = () => {
   ];
 
   
-  const monthLabel = months.find(m => m.value === selectedMonth)?.label.slice(0, 3);
-  const selectedMonthData = subjectPerformanceData.find(d => d.name === monthLabel);
 
+ const [recentActivities, setrecentActivities] = useState<any[]>([]);
+const [totalAssessments, setTotalAssessments] = useState<any>({});
+const [userPerformance, setUserPerformance] = useState<any[]>([]);
+const [subjectPerformanceData,setsubjectPerformanceData]=useState<any[]>([]);
+const [topicPerformanceData,settopicPerformanceData]=useState<any[]>([]);
 
-  const filteredSubjectPerformance = subjectPerformanceData.filter(d => {
-    const monthAbbr = months.find(m => m.value === selectedMonth)?.label.slice(0,3);
-    return d.name === monthAbbr;
-  });
+const user_id = localStorage.getItem("user_id");
+useEffect(() => {
+   
+  const fetchRecentActivities = async () => {
+    try {
+  
+      const res=await axios.post('http://127.0.0.1:5000/recent_activity',{user_id})
+      setrecentActivities(res.data);
+    } 
+    catch (error) {
+      console.error('Error fetching recent activities:', error);
+    }
+  };
+   
+  const total_assessments= async () => {
+    try {
+     
+      const res=await axios.post('http://127.0.0.1:5000/total_assessment',{user_id})
+      setTotalAssessments(res.data);
+    }
+    catch (error) {
+      console.error('Error fetching total assessments:', error);
+    }}
+  const fetchaverageScore = async () => {
+    try {
+      const action="average_score"
+      const res = await axios.post('http://127.0.0.1:5000/analysis', {action, user_id ,selectedYear});
+      setUserPerformance(res.data);
+    } catch (error) {
+     toast({
+      title:'Error '
+      ,description: error?.response?.data?.message || "Failed to fetch user performance data."})
+     }}
+     total_assessments();
+    fetchaverageScore();
+    fetchRecentActivities();
+    
+},[]);
 
-  const barChartData = selectedMonthData
+{/*useEffect(() => {
+    const fetchUserPerformance = async () => {
+      try {
+        const action = "subject_score";
+        const res = await axios.post('http://127.0.0.1:5000/analysis',{action,user_id,selectedYear,selectedMonth})
+        setsubjectPerformanceData(res.data[0]);}
+    }
+    
+    fetchUserPerformance();
+}, [selectedYear, selectedMonth]);*/}
+
+const monthLabel = months.find(m => m.value === selectedMonth)?.label.slice(0, 3);
+const selectedMonthData = subjectPerformanceData.find(d => d.name === monthLabel);
+const filteredSubjectPerformance = subjectPerformanceData.filter(d => {
+const monthAbbr = months.find(m => m.value === selectedMonth)?.label.slice(0,3);
+return d.name === monthAbbr;
+ });
+const barChartData = selectedMonthData
   ? Object.entries(selectedMonthData)
       .filter(([key]) => key !== 'name')
       .map(([subject, score]) => ({
         subject,
         score,
-        color: score < 75 ? '#ef4444' : '#3b82f6'
+        color: Number(score) < 75 ? '#ef4444' : '#3b82f6'
       }))
   : [];
 
-  const filteredTopicData = topicPerformanceData.filter((entry) => {
+ const filteredTopicData = topicPerformanceData.filter((entry) => {
   const entryDate = new Date(entry.date);
   return (
     entryDate.getFullYear() === selectedYear &&
@@ -211,34 +223,6 @@ const getDifficulty = (topic) => {
   const getBarColor = (value) => (value < 75 ? '#ef4444' : '#3b82f6'); 
 
 
- const [recentActivities, setrecentActivities] = useState<any[]>([]);
-const [totalAssessments, setTotalAssessments] = useState<any[]>([]);
-useEffect(() => {
-  
-  const fetchRecentActivities = async () => {
-    try {
-      const user_id = localStorage.getItem("user_id");
-      const res=await axios.post('http://127.0.0.1:5000/recent_activity',{user_id})
-      setrecentActivities(res.data);
-    } 
-    catch (error) {
-      console.error('Error fetching recent activities:', error);
-    }
-  };
-   
-  const total_assessments= async () => {
-    try {
-      const user_id = localStorage.getItem("user_id");
-      const res=await axios.post('http://127.0.0.1:5000/total_assessment',{user_id})
-      setTotalAssessments(res.data);
-    }
-    catch (error) {
-      console.error('Error fetching total assessments:', error);
-    }}
-    fetchRecentActivities();
-    total_assessments();
-},[]);
-
 
   return (
     <MainLayout>
@@ -265,7 +249,7 @@ useEffect(() => {
           </Card>
 
 
-          <Card>
+          
 
      { /*    <Card>
             <CardHeader className="pb-2">

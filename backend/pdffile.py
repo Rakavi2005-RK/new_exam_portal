@@ -276,3 +276,40 @@ useEffect(() => {
     fetchRecentActivities();
     total_assessments();
 },[]);"""
+@routes.route("/code_generator",methods=["POST"])
+def code_generator():
+    data=request.json
+    query=data["query"]
+    language=data["language"]
+    api_key=Config.API_KEY1
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel(
+        model_name="gemini-2.0-flash",
+        generation_config={
+        "temperature": 0.2,
+        "top_p": 1,
+        "top_k": 1,
+        "max_output_tokens": 2048,
+        })
+        code_prompt = f"""
+                    Generate the code in {language} for the following task: {query}.
+                     Include in-line comments in the code (explain key steps briefly).
+                     Do NOT use Markdown formatting.
+                     Return a proper explanation of the code in plain text (no markdown).
+                     Respond strictly in JSON format like this:
+                     {{
+                     "code":"print(\\"hello\\"),
+                     "explanation":""print is a built-in Python function. It's used to send output to the standard output device, usually the console or terminal. 
+                     \\"hello\\" is a string literal, i.e., a sequence of characters surrounded by quotes (\\\" \\\" or '\\' '). 
+                     Here, it's the argument to the print() function. Python passes \\"hello\\" into the print() function to be displayed.""
+                     }} 
+                     Only return a valid JSON object. Do not include anything outside the JSON."""
+        code_response = model.generate_content(code_prompt)
+        code = re.sub(r"```json\n|\n```", "",code_response.text).strip()
+        code_json=json.loads(code)
+        
+    except Exception as e:
+        return jsonify({"message":"{e},something went wrong"}),400
+    return jsonify({"code":code_json["code"],"explanation":code_json["explanation"]}),200
+    

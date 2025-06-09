@@ -314,4 +314,4 @@ export default function ForgotPassword() {
       </DialogContent>
     </Dialog>
   );
-}
+}}
