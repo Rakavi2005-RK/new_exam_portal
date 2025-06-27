@@ -18,6 +18,7 @@ from reportlab.lib.styles import getSampleStyleSheet,ParagraphStyle
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from io import BytesIO
+import traceback
 from docx import Document
 from calendar import month_abbr,monthrange
 
@@ -446,7 +447,7 @@ def pending():
         if r.due_date<datetime.now(tz) and r.status==Status.pending:
             Question.delete_expired(r)
         
-    response={"user_name":user.username,"assessments":[{"id":r.id,"subject":r.subject,"topic":r.topic,"status":r.status.value,"created_at":r.time,"due_date":r.due_date}  for r in res if r.due_date.replace(tzinfo=tz)>datetime.now(tz) ]}
+    response={"user_name":user.username,"assessments":[{"id":r.id,"subject":r.subject,"topic":r.topic,"status":r.status.value,"created_at":r.time,"due_date":r.due_date, "score":r.score}  for r in res if r.due_date.replace(tzinfo=tz)>datetime.now(tz) ]}
     return jsonify(response)
 
 # deleting the account
@@ -559,7 +560,7 @@ def recent_activity():
                     "title": f"{u.subject} Assessment completed ",
                     "time": settime,
                     "status": u.status.value,
-                    "description": f" scored {(u.score/30)*100}% on {u.topic}"
+                    "description": f" scored {round(((u.score/30)*100),2)}% on {u.topic}"
                 })
             elif u.status == Status.pending:
                 response.append({
@@ -631,13 +632,14 @@ def total_assessment():
         current_percent = (count / (days_in_current * 3) * 100) if count else 0
         total_percent = current_percent - previous_percent
         approximate_avg_score = average_score - average_prev_month
-
+        print(count)
         return jsonify({
             "total_assessment": count,
             "percentage": f"{total_percent:.2f}%",
             "average": average_score,
             "approxi_average": approximate_avg_score
         }), 200
+    
 
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
@@ -648,90 +650,144 @@ def analysis():
     try:
         data=request.json
         user_id=data["user_id"]
-        action=data["actions"]
        
         user=Score.query.filter_by(user_id=user_id).all()
         if not user:
             return jsonify({"message":"No assessments found"}),404
     
-        year=data["year"]
+        year=data["selectedYear"]
         year_start=datetime(year,1,1,0,0,0,0)
         year_end=datetime(year,12,31,23,59,59,999999)
         
 
         # nothing available in the specific year
         if not any(score.time >= year_start and score.time <= year_end for score in user):
-            return jsonify({"message": "No assessments found for the specified year"}), 404
-        if action=="average_score":    
-            average_scores=[]
-            subject_scores = []
-            topic_scores=[]
-        # month wise average scores
-            average_stats=(
-            db.session.query(
-                extract('month',Score.time).label('month'),
-                func.avg(Score.score).label('average_score'),
-                func.count(Score.id).label('total_assessments')
-            ) .filter(
-                    Score.user_id == user_id,
-                    Score.time >= year_start,
-                    Score.time <= year_end
-            ).group_by('month').order_by('month').all()
-            )  
-            return jsonify(average_scores),200   
+            return jsonify({"message": "No assessments found for the specified year"}), 404    
+        topic_scores=[]
         # month wise subject average
         
-        if action=="subject_score":  
-            month=data["month"]      
-            month_start=datetime(year,month,1)
-            last_day=monthrange(year,month)[1]   
-            month_end= datetime(year,month,last_day,23,59,59,999999) 
-            subject_stats=(
-                db.session.query(
-                    Score.subject,
-                    extract('month',Score.time).label('month'), 
-                    func.avg(Score.score).label('average_score')
-                ).filter(
-                    Score.user_id == user_id,
-                    Score.time >= month_start,
-                    Score.time <= month_end
-                ).group_by(
-                    Score.subject, extract('month',Score.time)
-                
-                ).order_by(
-                    Score.subject          
-                )
+        month=data["selectedMonth"]      
+        month_start=datetime(year,month,1)
+        last_day=monthrange(year,month)[1]   
+        month_end= datetime(year,month,last_day,23,59,59,999999) 
+        # topic wise scores
+        topic_stat=(
+            db.session.query(
+                Score.topic,
+                Score.time,
+                Score.score,
+                Score.difficulty
+            ).filter(
+                Score.user_id == user_id,
+                Score.time >= month_start,
+                Score.time <= month_end
+            ).order_by(
+                Score.topic, 
             )
-            # topic wise scores
-            topic_stat=(
-                db.session.query(
-                    Score.topic,
-                    Score.time,
-                    Score.score,
-                    Score.difficulty
-                ).filter(
-                    Score.user_id == user_id,
-                    Score.time >= month_start,
-                    Score.time <= month_end
-                ).order_by(
-                    Score.topic, 
-                )
+        )
+        topic_scores = [{'topic': topic, 'date':time.strftime("%Y-%m-%d"),'score': score if score is not None else 0,"difficulty":difficulty.value} 
+                        for topic,time,score,difficulty in topic_stat]      
+        return jsonify(topic_scores), 200
+       
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500        
+    
+    
+#subject wise analysis
+@routes.route("/sub_analysis",methods=["POST"])
+def sub_analysis():
+    try:
+        data=request.json
+        user_id=data["user_id"]
+       
+        user=Score.query.filter_by(user_id=user_id).all()
+        if not user:
+            return jsonify({"message":"No assessments found"}),404
+    
+        year=data["selectedYear"]
+        year_start=datetime(year,1,1,0,0,0,0)
+        year_end=datetime(year,12,31,23,59,59,999999)
+        
+
+        # nothing available in the specific year
+        if not any(score.time >= year_start and score.time <= year_end for score in user):
+            return jsonify({"message": "No assessments found for the specified year"}), 404    
+        subject_scores = []
+        # month wise subject average
+        
+        month=data["selectedMonth"]      
+        month_start=datetime(year,month,1)
+        last_day=monthrange(year,month)[1]   
+        month_end= datetime(year,month,last_day,23,59,59,999999) 
+        subject_stats=(
+            db.session.query(
+                Score.subject,
+                extract('month',Score.time).label('month'), 
+                func.avg(Score.score).label('average_score')
+            ).filter(
+                Score.user_id == user_id,
+                Score.time >= month_start,
+                Score.time <= month_end
+            ).group_by(
+                Score.subject, extract('month',Score.time)
+            
+            ).order_by(
+                Score.subject          
             )
-        average_scores= [
-            {"month": month_abbr[month], "average_score": average_score if average_score is not None else 0, "total_assessments": total_assessments}  
-            for month, average_score, total_assessments in average_stats]
+        )
+        
         subject_scores = [
                 {"month": month_abbr[month], "subject": subject, "average_score": average_score if average_score is not None else 0} 
                   for subject, month, average_score in subject_stats]
-
-        topic_scores = [{'topic': topic, 'date':time.strftime("%Y-%m-%d"),'score': score if score is not None else 0,"difficulty":difficulty.value} 
-                        for topic,time,score,difficulty in topic_stat]
-                
-        return jsonify(subject_scores,topic_scores), 200
-       
-            
+        return jsonify(subject_scores), 200
+           
     except Exception as e:
+        traceback.print_exc()
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+    
+# for performance analysis
+@routes.route("/performance_analysis",methods=["POST"])
+def performance_analysis():
+    try:
+        data=request.json
+        user_id=data["user_id"]
+       
+        user=Score.query.filter_by(user_id=user_id).all()
+        if not user:
+            return jsonify({"message":"No assessments found"}),404
+    
+        year=data["selectedYear"]
+        year_start=datetime(year,1,1,0,0,0,0)
+        year_end=datetime(year,12,31,23,59,59,999999)
+        
+
+        # nothing available in the specific year
+        if not any(score.time >= year_start and score.time <= year_end for score in user):
+            return jsonify({"message": "No assessments found for the specified year"}), 404    
+        average_scores=[]
+        # month wise average scores
+        average_stats=(
+        db.session.query(
+            extract('month',Score.time).label('month'),
+            func.avg(Score.score).label('average_score'),
+            func.count(Score.id).label('total_assessments')
+        ) .filter(
+                Score.user_id == user_id,
+                Score.time >= year_start,
+                Score.time <= year_end
+        ).group_by('month').order_by('month').all()
+        )  
+         
+        average_scores= [
+            {"month": month_abbr[month], "average_score": average_score if average_score is not None else 0, "total_assessments": total_assessments}  
+            for month, average_score, total_assessments in average_stats] 
+        return jsonify(average_scores), 200
+       
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+    
 # Preview of the assessment
 @routes.route("/preview",methods=["POST"])
 def preview():

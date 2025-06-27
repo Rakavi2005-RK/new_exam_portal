@@ -6,7 +6,6 @@ import './App.css';
 // Pages
 import Index from './pages/Index';
 import Login from './pages/Login';
-import ForgotPassword from './pages/ForgotPassword';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Assessments from './pages/Assessments';
@@ -24,6 +23,7 @@ import ScorePage from './pages/ScorePage';
 
 import Preview from './pages/Preview';
 import { Toaster } from './components/ui/toaster';
+import ForgotPassword from './pages/ForgotPassword';
 
 
 const App: React.FC = () => {
