@@ -250,13 +250,13 @@ const SettingsSecurity = () => {
         <CardContent className="space-y-4">
           <div className="rounded-lg border border-destructive p-4">
            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
+              <div  className="flex-1">
                 <h4 className="font-medium">Delete Account</h4>
                 <p className="text-sm text-muted-foreground">
                   Permanently delete your account and all associated data.
                 </p>
               </div>
-              <Button variant="destructive" onClick={()=>onDelete()}>Delete Account</Button>
+              <Button variant="destructive" className="w-full sm:w-auto min-w-[150px]"  onClick={()=>onDelete()}>Delete Account</Button>
             </div>
           </div>
         </CardContent>

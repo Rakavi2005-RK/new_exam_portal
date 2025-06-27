@@ -92,7 +92,7 @@ const Analytics = () => {
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         toast({
-          title: 'Error',
+          title: "",
           description: error.response?.data?.message || "Failed to fetch analytics data.",
           variant: 'destructive',
         });
