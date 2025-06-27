@@ -249,7 +249,7 @@ const SettingsSecurity = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="rounded-lg border border-destructive p-4">
-            <div className="flex flex-row items-center justify-between">
+           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
                 <h4 className="font-medium">Delete Account</h4>
                 <p className="text-sm text-muted-foreground">

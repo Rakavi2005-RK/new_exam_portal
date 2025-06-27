@@ -111,10 +111,10 @@ const Dashboard: React.FC = () => {
                           <strong>Subject:</strong> {assessment.subject}
                         </div>
                         <div className="text-sm text-muted-foreground mb-1">
-                          <strong>Teacher:</strong> {assessment.teacher}
+                          <strong>created:</strong> {assessment.created_at}
                         </div>
                         <div className="text-sm text-muted-foreground mb-1">
-                          <strong>Due Date:</strong> {assessment.dueDate}
+                          <strong>Due Date:</strong> {assessment.due_date}
                         </div>
                         <div className="text-sm text-muted-foreground mb-2">
                           <strong>Status:</strong>{" "}
