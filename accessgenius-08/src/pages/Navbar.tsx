@@ -33,12 +33,12 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 h-16 bg-white bg-opacity-90 backdrop-blur-md shadow-lg flex items-center justify-between px-8 dark:bg-gray-900 dark:bg-opacity-90 transition-colors duration-300">
+    <nav className="fixed top-0 left-0 w-full z-50 h-16 bg-white bg-opacity-90 backdrop-blur-md shadow-lg flex items-center justify-between px-4 sm:px-8 dark:bg-gray-900 dark:bg-opacity-90 transition-colors duration-300">
       <div className="text-2xl font-extrabold text-blue-600 tracking-wide select-none cursor-pointer dark:text-blue-400">
         <Logo />
       </div>
 
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-2 sm:space-x-4">
         <button
           onClick={toggleDarkMode}
           aria-label="Toggle theme"
@@ -50,7 +50,7 @@ const Navbar: React.FC = () => {
 
         <button
           onClick={handleLoginClick}   
-          className="px-5 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300"
+          className="px-3 py-1.5 text-sm sm:px-5 sm:py-2 sm:text-base bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-300"
         >
           Login
         </button>

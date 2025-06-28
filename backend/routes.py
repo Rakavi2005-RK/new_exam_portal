@@ -380,8 +380,7 @@ def generate_assessment():
             model_output = json.loads(clean_response)
         except json.JSONDecodeError as e:
             print("JSON Decode Error:", e)
-        print(type(model_output))
-        print(model_output)
+
         
         
         if not model_output or not isinstance(model_output,list) :
@@ -406,6 +405,7 @@ def generate_assessment():
     except Exception as e:
                 return Response(f"Google AI Error: {str(e)}", status=500, mimetype="text/plain")
     
+ # Starting the assessment   
 @routes.route("/start",methods=["POST"])
 def start():
     data=request.json
@@ -581,6 +581,7 @@ def recent_activity():
         return jsonify(response), 200
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+    
 # Total assessment
 @routes.route("/total_assessment", methods=["POST"])
 def total_assessment():
@@ -632,7 +633,7 @@ def total_assessment():
         current_percent = (count / (days_in_current * 3) * 100) if count else 0
         total_percent = current_percent - previous_percent
         approximate_avg_score = average_score - average_prev_month
-        print(count)
+        
         return jsonify({
             "total_assessment": count,
             "percentage": f"{total_percent:.2f}%",
