@@ -6,7 +6,7 @@ import AuthPageLayout from "@/components/layout/AuthLayout"
 import { useBreakpoint } from "@/hooks/use-mobile"
 
 export default function LoginPage() {
-  const { isMobile } = useBreakpoint();
+  const { isMobile, isTablet } = useBreakpoint();
 
   const content = (
     <div className="container max-w-lg mx-auto py-8">
@@ -22,5 +22,5 @@ export default function LoginPage() {
     </div>
   );
 
-  return isMobile ? <AuthPageLayout>{content}</AuthPageLayout> : <MainLayout>{content}</MainLayout>;
+  return isMobile || isTablet ? <AuthPageLayout>{content}</AuthPageLayout> : <MainLayout>{content}</MainLayout>;
 }
