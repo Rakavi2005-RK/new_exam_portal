@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
+//import { useToast } from "@/components/ui/use-toast";
 import {
   Form,
   FormControl,
@@ -20,7 +20,9 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
 import { Shield, AlertTriangle } from "lucide-react";
 import axios from "axios";
-import { toast } from "sonner";
+//import { toast } from "sonner";
+import { Description } from "@radix-ui/react-dialog";
+import { toast } from "@/hooks/use-toast";
 
 const passwordFormSchema = z.object({
   currentPassword: z.string().min(8, {
@@ -73,19 +75,20 @@ const SettingsSecurity = () => {
       try {
     const res = await axios.post("http://127.0.0.1:5000/reset-password", arr);
     if (res.status === 200) {
-       toast.success(res.data?.message || "Your password has been updated successfully.");
+       toast({ title: "Success", description: "Your password has been updated successfully.",variant: "destructive"});
       passwordForm.reset({
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
       });
     } else {
-       toast.error(res.data?.message || "Failed to update password.");
+       toast({ title: "Error", description: res.data?.message || "Failed to update password." ,variant: "destructive"});
     }
   } catch (error: any) {
-      toast.error(
-    error?.response?.data?.message || "Failed to update password."
-  );
+      toast({
+    title: "Error",
+    description: error?.response?.data?.message || "Failed to update password.",variant: "destructive"
+  });
   }
   }
   // request to delete 

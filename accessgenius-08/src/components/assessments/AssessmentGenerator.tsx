@@ -12,6 +12,8 @@ import {
   Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
+import { FileUp, FileText } from 'lucide-react';
 import { Loader2, Brain, Sparkles } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import axios from 'axios';
@@ -58,6 +60,7 @@ const AssessmentGenerator: React.FC = () => {
     { value: "hard", label: "Hard" },
     { value: "expert", label: "Expert" },
   ];
+
 
   // Initialize and track remaining assessments per day
   useEffect(() => {
