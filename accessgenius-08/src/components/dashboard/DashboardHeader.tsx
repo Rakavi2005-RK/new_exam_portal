@@ -57,7 +57,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   <DialogTrigger asChild>
     <Button variant="outline" size="sm">
       <Plus className="mr-2 h-4 w-4" />
-      New
+    question Generator
     </Button>
   </DialogTrigger>
   <DialogContent className="sm:max-w-[900px] overflow-y-auto max-h-[90vh]">

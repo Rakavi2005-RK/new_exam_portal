@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { FileUp, Eye, Download } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import axios from "axios";
 
 const UploadSyllabusTab = () => {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -17,6 +18,7 @@ const UploadSyllabusTab = () => {
   const [menuVisible, setMenuVisible] = useState<number | null>(null);
   const [isGenerateEnabled, setIsGenerateEnabled] = useState(false);
   const [syllabusText, setSyllabusText] = useState("");
+  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
 
   const question = "Sample generated question will be displayed here.";
 
@@ -52,7 +54,7 @@ const UploadSyllabusTab = () => {
     checkGenerateButton(updatedItems);
   };
 
-  const handleGenerateQuestions = () => {
+  const handleGenerateQuestions = async () => {
     if (!pdfFile && syllabusText.trim() === "") {
       toast({
         title: "Missing Syllabus",
@@ -61,21 +63,51 @@ const UploadSyllabusTab = () => {
       });
       return;
     }
+    try {
+      const formData = new FormData();
+        if (pdfFile) {
+            formData.append("file", pdfFile);
+        } else {
+            formData.append("syllabus_text", syllabusText);
+        }
+      
 
-    setQuestionGenerated(true);
+      newItems.forEach((item, index) => {
+        formData.append(`marks_${index}`, item.marks.toString());
+        formData.append(`questions_${index}`, item.questions.toString());
+      });
+
+      const res=await axios.post("http://127.0.0.1:5000/Pdffile", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+       responseType: "blob"
+    });
+    if (res.status === 200) {
+        setPdfBlob(res.data);
+        setQuestionGenerated(true);
     toast({
       title: "Generated!",
       description: "Questions generated successfully.",
     });
+}}
+    catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate questions. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDownloadQuestion = () => {
-    const element = document.createElement("a");
-    const fileBlob = new Blob([question], { type: "text/plain" });
-    element.href = URL.createObjectURL(fileBlob);
-    element.download = `${fileName}_question_paper.txt`;
-    document.body.appendChild(element);
-    element.click();
+  if (!pdfBlob) return;
+  const url = window.URL.createObjectURL(pdfBlob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${fileName}_question_paper.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
   };
 
   const toggleMenu = (index: number) => {
